@@ -1,0 +1,7 @@
+*.pyc
+/settings/local.py
+/staticfiles
+strato.env
+/gunicorn.env
+/settings/gunicorn.py
+/dist
