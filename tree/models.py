@@ -3,12 +3,83 @@ Models for the tree app.
 
 """
 from django.db import models
+from django.db.models import Case, CharField, Q, Value as V, When
+from django.db.models.functions import Cast, Concat
+from django.utils.text import slugify
+
+
+class AncestorQuerySet(models.QuerySet):
+    """Custom QuerySet for the Ancestor model."""
+
+    def get_by_natural_key(self, slug):
+        return self.get(slug=slug)
+
+    def order_by_age(self):
+        queryset = self._clone()
+
+        return (
+            queryset
+            .annotate(
+                birthyear_as_str=Cast('birthyear', output_field=CharField()),
+                year_of_death_as_str=Cast(
+                    'year_of_death', output_field=CharField()
+                )
+            )
+            .annotate(
+                age=models.Case(
+                    When(
+                        Q(
+                            birthyear__isnull=False,
+                            year_of_death__isnull=False
+                        ),
+                        then=Concat(
+                            'birthyear_as_str', V(' - ') ,
+                            'year_of_death_as_str'
+                        )
+                    ),
+                    When(
+                        Q(
+                            birthyear__isnull=False,
+                            has_expired=True
+                        ),
+                        then=Concat(
+                            'birthyear_as_str', V(' - ') , V('????')
+                        )
+                    ),
+                    When(
+                        Q(
+                            birthyear__isnull=False,
+                            has_expired=False
+                        ),
+                        then=Concat(
+                            'birthyear_as_str', V(' -')
+                        )
+                    ),
+                    When(
+                        year_of_death__isnull=False,
+                        then=Concat(
+                            V('????'), V(' - ') , 'year_of_death_as_str'
+                        )
+                    ),
+                    When(
+                        has_expired=True,
+                        then=Concat(
+                            V('????'), V(' - '), V('????')
+                        )
+                    ),
+                    output_field=CharField()
+                )
+            )
+            .order_by('age')
+        )
 
 
 class Ancestor(models.Model):
     """Model for the ancestor data."""
 
     birthdate = models.DateField('Geboortedatum', null=True, blank=True)
+
+    birthyear = models.IntegerField('Geboortejaar', null=True, blank=True)
 
     birthplace = models.CharField('Geboorteplaats', max_length=100, blank=True)
 
@@ -18,7 +89,8 @@ class Ancestor(models.Model):
 
     father = models.ForeignKey(
         'self', related_name='children_of_father', on_delete=models.PROTECT,
-        verbose_name='Vader', null=True, blank=True)
+        verbose_name='Vader', null=True, blank=True,
+        limit_choices_to=models.Q(gender='m'))
 
     firstname = models.CharField('Voornaam', max_length=100, blank=True)
 
@@ -27,29 +99,102 @@ class Ancestor(models.Model):
         ('f', 'Vrouw')
     ], blank=True)
 
+    has_expired = models.BooleanField('Overleden', default=False)
+
+    is_root = models.BooleanField('Begin stamboom', default=False)
+
     lastname = models.CharField('Achternaam', max_length=100, blank=True)
 
     middlename = models.CharField('Tussenvoegsel', max_length=100, blank=True)
 
     mother = models.ForeignKey(
         'self', related_name='children_of_mother', on_delete=models.PROTECT,
-        verbose_name='Moeder', null=True, blank=True)
+        verbose_name='Moeder', null=True, blank=True,
+        limit_choices_to=models.Q(gender='f'))
 
     place_of_death = models.CharField(
         'Plaats van overlijden', max_length=100, blank=True)
 
+    slug = models.SlugField('Slug', max_length=255, blank=True, db_index=True)
+
+    year_of_death = models.IntegerField(
+        'Jaar van overlijden', null=True, blank=True)
+
+    objects = AncestorQuerySet.as_manager()
+
     class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['is_root'], name='is_root_true',
+                condition=models.Q(is_root=True)
+            )
+        ]
         ordering = ['birthdate']
         verbose_name = 'Voorouder'
         verbose_name_plural = 'Voorouders'
 
     def __str__(self):
+        return self.get_fullname()
+
+    def clean(self):
+        if self.year_of_death:
+            self.has_expired = True
+
+        if not self.slug:
+            serial = 0
+            while True:
+                parts = [self.get_fullname(), self.get_age('xxxx')]
+                if serial:
+                    parts.append(str(serial))
+                slug = slugify(' '.join(parts))
+                if len(slug) > 255:
+                    slug = slug[:(255 - (len(str(serial)) + 1))]
+                try:
+                    queryset = self.__class__.objects.get_queryset()
+                    if self.pk:
+                        queryset = queryset.exclude(pk=self.pk)
+                    queryset.get_by_natural_key(slug)
+                    serial += 1
+                except self.__class__.DoesNotExist:
+                    break
+            self.slug = slug
+
+    def natural_key(self):
+        return (self.slug, )
+
+    def get_fullname(self):
         parts = filter(None, [
             self.firstname,
             self.middlename,
             self.lastname
         ])
         return ' '.join(parts)
+    get_fullname.short_description = 'Naam'
+
+    def get_age(self, placeholder='????'):
+        if self.birthyear and self.year_of_death:
+            parts = [
+                self.birthyear,
+                self.year_of_death
+            ]
+        elif self.birthyear:
+            parts = [self.birthyear, placeholder if self.has_expired else '']
+        elif self.year_of_death:
+            parts = [placeholder, self.year_of_death]
+        else:
+            parts = [placeholder, placeholder if self.has_expired else '']
+
+        return ' - '.join(map(str, parts)).rstrip()
+    get_age.short_description = 'Geboorte/sterftejaar'
+
+    @property
+    def was_married(self):
+        if self.gender == 'm':
+            return self.marriages_of_husband.count() > 0
+        elif self.gender == 'f':
+            return self.marriages_of_wife.count() > 0
+
+        return False
 
 
 class Marriage(models.Model):
