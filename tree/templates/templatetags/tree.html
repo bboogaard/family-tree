@@ -1,0 +1,25 @@
+{% load tree_tags %}
+
+
+{% if marriages %}
+    {% for ancestor, spouse, children in marriages %}
+    <div class="marriage">
+        {% render_ancestor ancestor %}
+        <div class="join">x</div>
+        {% render_ancestor spouse 'spouse' %}
+    </div>
+        {% if children %}
+        <ul>
+            {% for child in children %}
+            <li{% if forloop.counter == children|length|add:'-1' %} class="penultimate"{% endif %}>
+                {% if child.was_married and child in lineage %}
+                    {% render_tree child lineage %}
+                {% else %}
+                    {% render_ancestor child %}
+                {% endif %}
+            </li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+    {% endfor %}
+{% endif %}

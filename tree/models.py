@@ -3,7 +3,8 @@ Models for the tree app.
 
 """
 from django.db import models
-from django.db.models import Case, CharField, Q, Value as V, When
+from django.db.models import Case, CharField, Exists, OuterRef, Q, \
+    Value as V, When
 from django.db.models.functions import Cast, Concat
 from django.utils.text import slugify
 
@@ -13,6 +14,32 @@ class AncestorQuerySet(models.QuerySet):
 
     def get_by_natural_key(self, slug):
         return self.get(slug=slug)
+
+    def by_parent(self, parent):
+        queryset = self._clone()
+
+        if parent.gender == 'm':
+            queryset = queryset.filter(father=parent)
+        elif parent.gender == 'f':
+            queryset = queryset.filter(mother=parent)
+
+        return queryset
+
+    def with_children(self):
+        queryset = self._clone()
+
+        queryset = (
+            queryset.filter(
+                Exists(
+                    self.model.objects
+                    .filter(
+                        Q(father=OuterRef('pk')) | Q(mother=OuterRef('pk'))
+                    )
+                )
+            )
+        )
+
+        return queryset
 
     def order_by_age(self):
         queryset = self._clone()
@@ -196,6 +223,38 @@ class Ancestor(models.Model):
 
         return False
 
+    @property
+    def children(self):
+        if self.gender == 'm':
+            return self.children_of_father
+        elif self.gender == 'f':
+            return self.children_of_mother
+
+        return Ancestor.objects.none()
+
+    @property
+    def marriages(self):
+        if self.gender == 'm':
+            return self.marriages_of_husband
+        elif self.gender == 'f':
+            return self.marriages_of_wife
+
+        return Marriage.objects.none()
+
+    def get_spouse(self, marriage):
+        if self.gender == 'm':
+            return marriage.wife
+        elif self.gender == 'f':
+            return marriage.husband
+
+        return None
+
+    def get_lineage(self):
+        try:
+            return Lineage.objects.get(ancestor=self)
+        except Lineage.DoesNotExist:
+            pass
+
 
 class Marriage(models.Model):
     """Model for the marriage data."""
@@ -231,3 +290,29 @@ class Marriage(models.Model):
 
     def __str__(self):
         return '{} x {}'.format(str(self.husband), str(self.wife))
+
+
+class Lineage(models.Model):
+    """Model for lineage data."""
+
+    ancestor = models.OneToOneField(
+        Ancestor,
+        on_delete=models.CASCADE,
+        related_name='lineage',
+        verbose_name='Voorouder'
+    )
+
+    descendant = models.ForeignKey(
+        Ancestor,
+        on_delete=models.CASCADE,
+        related_name='lineages',
+        verbose_name='Nakomeling'
+    )
+
+    class Meta:
+        unique_together = ['ancestor', 'descendant']
+        verbose_name = 'Afstamming'
+        verbose_name_plural = 'Afstammingen'
+
+    def __str__(self):
+        return '{} > {}'.format(str(self.ancestor), str(self.descendant))

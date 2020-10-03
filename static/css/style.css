@@ -1,0 +1,84 @@
+body {
+    font-family: arial;
+    padding-top: 20px;
+    color: #666;
+}
+h1 {
+    margin-left: 10px;
+    margin-bottom: 50px;
+}
+
+ul.tree, ul.tree ul {
+   list-style: none;
+   margin: 0;
+   padding: 0;
+}
+ul.tree ul {
+   margin-left: 10px;
+}
+ul.tree li {
+    padding: 0 7px;
+    line-height: 20px;
+    color: #000;
+    border-left: 1px solid rgb(100,100,100);
+    margin: 0px 0px 0px 200px;
+}
+ul.tree li:before {
+    position: relative;
+    top: 1.3em;
+    height: 2em;
+    width: 100px;
+    color: white;
+    border-bottom: 1px solid rgb(100,100,100);
+    content: "";
+    display: inline-block;
+    left: -7px;
+}
+ul.tree li:last-child {
+    border-left: none;
+    margin-top: -1.3em;
+}
+ul.tree li:last-child:before {
+    border-left: 1px solid rgb(100,100,100);
+}
+ul.tree li.root {
+    margin-left: 0px;
+}
+ul.tree li.root > div .male,
+ul.tree li.root > div .female {
+    margin-left: 5px;
+}
+ul.tree li.root > ul > li {
+  margin-left:100px;
+}
+ul.tree li.root:before {
+    content: "";
+    display: inline;
+    border-left: none;
+}
+ul.tree li.penultimate:after {
+    content: "-";
+    visibility: hidden;
+}
+
+.marriage div {
+    display: inline-block;
+}
+div[data-url] {
+    cursor: pointer;
+}
+.male, .female {
+    border: 1px solid rgb(100,100,100);
+    width: fit-content;
+    padding: 10px;
+    margin-left: 93px;
+}
+.spouse {
+    margin-left: 5px;
+}
+.male {
+    background-color: lightblue;
+}
+.female {
+    background-color: lightpink;
+}

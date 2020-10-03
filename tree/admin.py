@@ -61,6 +61,28 @@ class MarriageOfWifeInLine(admin.TabularInline):
     form = MarriageForm
 
 
+class LineageForm(forms.ModelForm):
+
+    class Meta:
+        model = models.Lineage
+        fields = '__all__'
+        field_classes = {
+            'ancestor': AncestorField,
+            'descendant': AncestorField
+        }
+
+
+class LineageInLine(admin.TabularInline):
+
+    model = models.Lineage
+
+    extra = 0
+
+    fk_name = 'ancestor'
+
+    form = LineageForm
+
+
 class AncestorForm(forms.ModelForm):
 
     class Meta:
@@ -113,7 +135,7 @@ class MotherFilter(AncestorFilter):
 
 class AncestorAdmin(admin.ModelAdmin):
 
-    inlines = [MarriageOfHusbandInLine, MarriageOfWifeInLine]
+    inlines = [MarriageOfHusbandInLine, MarriageOfWifeInLine, LineageInLine]
 
     list_display = ['get_fullname', 'get_age', 'slug']
 
