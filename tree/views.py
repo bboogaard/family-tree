@@ -23,17 +23,14 @@ def tree(request, ancestor=None, descendant=None):
     if not descendant:
         lineage = get_object_or_404(models.Lineage, ancestor=ancestor)
         descendant = lineage.descendant
-        lineage = helpers.get_lineage(ancestor, lineage.descendant)
     else:
         descendant = get_object_or_404(models.Ancestor, slug=descendant)
-        lineage = helpers.get_lineage(ancestor, descendant)
 
     return render(
         request,
         'tree.html',
         {
             'root_ancestor': ancestor,
-            'descendant': descendant,
-            'lineage': lineage
+            'descendant': descendant
         }
     )
