@@ -18,15 +18,6 @@ class LineageFinder(object):
                 result.append(candidate)
         return result
 
-    def find_top(self, ancestor, descendant):
-        candidates = [
-            lineage.ancestor
-            for lineage in descendant.lineages.all()
-        ]
-        for candidate in candidates:
-            if self._is_ancestor(candidate, ancestor):
-                return candidate
-
     def _is_ancestor(self, candidate, descendant):
         self._descendant = None
         self._get_descendant(candidate, descendant)
