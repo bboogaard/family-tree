@@ -175,7 +175,10 @@ class Ancestor(models.Model):
                     parts.append(str(serial))
                 slug = slugify(' '.join(parts))
                 if len(slug) > 255:
-                    slug = slug[:(255 - (len(str(serial)) + 1))]
+                    slug = '-'.join(filter(lambda s: s != '0', [
+                        slug[:255 - (len(str(serial)) + 1 if serial else 0)],
+                        str(serial)
+                    ]))
                 try:
                     queryset = self.__class__.objects.get_queryset()
                     if self.pk:
