@@ -143,4 +143,5 @@ class AncestorAdmin(admin.ModelAdmin):
 
     form = AncestorForm
 
+
 admin.site.register(models.Ancestor, AncestorAdmin)

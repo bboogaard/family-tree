@@ -23,5 +23,7 @@ from tree.views import tree
 urlpatterns = [
     path('admin/', admin.site.urls),
     re_path('^stamboom/(?P<ancestor>[^/]*)$', tree, name='ancestor_tree'),
-    re_path('^stamboom/(?P<ancestor>[^/]+)/(?P<descendant>[^/]*)$', tree, name='lineage_tree'),
-] +  static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+    re_path(
+        '^stamboom/(?P<ancestor>[^/]+)/(?P<descendant>[^/]*)$', tree,
+        name='lineage_tree'),
+] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

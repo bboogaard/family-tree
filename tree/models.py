@@ -3,7 +3,7 @@ Models for the tree app.
 
 """
 from django.db import models
-from django.db.models import Case, CharField, Exists, OuterRef, Q, \
+from django.db.models import CharField, Exists, OuterRef, Q, \
     Value as V, When
 from django.db.models.functions import Cast, Concat
 from django.utils.text import slugify
@@ -60,7 +60,7 @@ class AncestorQuerySet(models.QuerySet):
                             year_of_death__isnull=False
                         ),
                         then=Concat(
-                            'birthyear_as_str', V(' - ') ,
+                            'birthyear_as_str', V(' - '),
                             'year_of_death_as_str'
                         )
                     ),
@@ -70,7 +70,7 @@ class AncestorQuerySet(models.QuerySet):
                             has_expired=True
                         ),
                         then=Concat(
-                            'birthyear_as_str', V(' - ') , V('????')
+                            'birthyear_as_str', V(' - '), V('????')
                         )
                     ),
                     When(
@@ -85,7 +85,7 @@ class AncestorQuerySet(models.QuerySet):
                     When(
                         year_of_death__isnull=False,
                         then=Concat(
-                            V('????'), V(' - ') , 'year_of_death_as_str'
+                            V('????'), V(' - '), 'year_of_death_as_str'
                         )
                     ),
                     When(

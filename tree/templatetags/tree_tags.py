@@ -5,9 +5,8 @@ Tags for rendering the tree.
 import itertools
 
 from django import template
-from django.urls import reverse
 
-from tree import helpers, models
+from tree import helpers
 
 
 register = template.Library()
@@ -37,6 +36,8 @@ def render_tree(context, ancestor, lineage):
         )
     )
 
+    print(lineage)
+
     context.update({
         'marriages': marriages,
         'lineage': lineage,
@@ -51,8 +52,8 @@ def render_ancestor(context, ancestor, css_class=None):
     descendant = context['descendant']
     lineage = ancestor.get_lineage()
 
-    if lineage and (ancestor != root_ancestor \
-            or lineage.descendant != descendant):
+    if lineage and ancestor != root_ancestor \
+            or lineage.descendant != descendant:
         descendant = lineage.descendant
     else:
         descendant = None

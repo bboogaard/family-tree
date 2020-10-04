@@ -2,8 +2,7 @@
 Helpers for the tree app.
 
 """
-from tree.models import Ancestor, Lineage
-
+from tree.models import Ancestor
 
 
 class LineageFinder(object):
