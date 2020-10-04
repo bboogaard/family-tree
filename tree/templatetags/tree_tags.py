@@ -5,6 +5,7 @@ Tags for rendering the tree.
 import itertools
 
 from django import template
+from django.template.loader import render_to_string
 
 from tree import helpers
 
@@ -13,7 +14,7 @@ register = template.Library()
 
 
 @register.inclusion_tag('templatetags/tree.html', takes_context=True)
-def render_tree(context, ancestor, lineage):
+def render_tree(context, ancestor, descendant):
     if ancestor.gender == 'm':
         marriages = []
         for marriage in ancestor.marriages_of_husband.all():
@@ -29,6 +30,9 @@ def render_tree(context, ancestor, lineage):
             ).order_by_age()
             marriages.append((ancestor, marriage.husband, children))
 
+    root_ancestor = context.get('root_ancestor', ancestor)
+    lineage = context.get('lineage', helpers.get_lineage(ancestor, descendant))
+
     flat_ancestors = context.get('flat_ancestors', [])
     flat_ancestors.extend(
         itertools.chain.from_iterable(
@@ -36,24 +40,29 @@ def render_tree(context, ancestor, lineage):
         )
     )
 
-    print(lineage)
-
     context.update({
         'marriages': marriages,
+        'root_ancestor': root_ancestor,
         'lineage': lineage,
+        'descendant': descendant,
         'flat_ancestors': flat_ancestors
     })
     return context
 
 
-@register.inclusion_tag('templatetags/ancestor.html', takes_context=True)
+@register.simple_tag(takes_context=True)
 def render_ancestor(context, ancestor, css_class=None):
-    root_ancestor = context['root_ancestor']
-    descendant = context['descendant']
+    root_ancestor = context.get('root_ancestor')
+    descendant = context.get('descendant')
+    if not root_ancestor or not descendant:
+        return ''
+
     lineage = ancestor.get_lineage()
 
-    if lineage and ancestor != root_ancestor \
-            or lineage.descendant != descendant:
+    if (
+            lineage and (
+                ancestor != root_ancestor or lineage.descendant != descendant
+            )):
         descendant = lineage.descendant
     else:
         descendant = None
@@ -71,9 +80,9 @@ def render_ancestor(context, ancestor, css_class=None):
         else:
             parent = None
 
-    return {
+    return render_to_string('templatetags/ancestor.html', {
         'ancestor': ancestor,
         'descendant': descendant,
         'parent': parent,
         'css_class': css_class
-    }
+    })

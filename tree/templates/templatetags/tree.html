@@ -13,7 +13,7 @@
             {% for child in children %}
             <li{% if forloop.counter == children|length|add:'-1' %} class="penultimate"{% endif %}>
                 {% if child.was_married and child in lineage %}
-                    {% render_tree child lineage %}
+                    {% render_tree child descendant %}
                 {% else %}
                     {% render_ancestor child %}
                 {% endif %}
