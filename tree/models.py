@@ -70,7 +70,7 @@ class AncestorQuerySet(models.QuerySet):
                             has_expired=True
                         ),
                         then=Concat(
-                            'birthyear_as_str', V(' - '), V('????')
+                            'birthyear_as_str', V(' - '), V('0000')
                         )
                     ),
                     When(
@@ -85,13 +85,13 @@ class AncestorQuerySet(models.QuerySet):
                     When(
                         year_of_death__isnull=False,
                         then=Concat(
-                            V('????'), V(' - '), 'year_of_death_as_str'
+                            V('0000'), V(' - '), 'year_of_death_as_str'
                         )
                     ),
                     When(
                         has_expired=True,
                         then=Concat(
-                            V('????'), V(' - '), V('????')
+                            V('0000'), V(' - '), V('0000')
                         )
                     ),
                     output_field=CharField()
