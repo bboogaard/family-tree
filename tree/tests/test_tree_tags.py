@@ -61,24 +61,24 @@ class TestTreeTags(TreeTestCase):
         self.generation_2[0].lastname = 'Glass'
         self.generation_2[0].birthyear = 1871
         self.generation_2[0].year_of_death = 1952
-        self.generation_2[0].full_clean()
         self.generation_2[0].slug = ''
+        self.generation_2[0].full_clean()
         self.generation_2[0].save()
 
         self.generation_2[1].firstname = 'Sylvia'
         self.generation_2[1].lastname = 'Glass'
         self.generation_2[1].birthyear = 1873
         self.generation_2[1].year_of_death = 1960
-        self.generation_2[1].full_clean()
         self.generation_2[1].slug = ''
+        self.generation_2[1].full_clean()
         self.generation_2[1].save()
 
         self.generation_extra[0].firstname = 'Minny'
         self.generation_extra[0].lastname = 'Friend'
         self.generation_extra[0].birthyear = 1888
         self.generation_extra[0].year_of_death = 1953
-        self.generation_extra[0].full_clean()
         self.generation_extra[0].slug = ''
+        self.generation_extra[0].full_clean()
         self.generation_extra[0].save()
 
     def render(self, value, **kwargs):
@@ -141,7 +141,7 @@ class TestTreeTags(TreeTestCase):
         self.assertEqual(result, expected)
 
         result = doc.attr('data-url')
-        expected = '/stamboom/john-glass-1812-1874/'
+        expected = '/stamboom/john-glass-1812-1874/johnny-glass-1871-1952'
         self.assertEqual(result, expected)
 
         result = doc.text()
@@ -186,7 +186,7 @@ class TestTreeTags(TreeTestCase):
         self.assertEqual(result, expected)
 
         result = doc.attr('data-url')
-        expected = '/stamboom/priscilla-glass-1840-1910/'
+        expected = '/stamboom/priscilla-glass-1840-1910/minny-friend-1888-1953'
         self.assertEqual(result, expected)
 
         result = doc.text()

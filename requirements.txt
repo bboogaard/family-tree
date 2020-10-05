@@ -14,3 +14,9 @@ importchecker==2.0
 cssselect==1.1.0
 lxml==4.5.2
 pyquery==1.4.1
+WebOb==1.8.6
+beautifulsoup4==4.9.3
+django-webtest==1.9.7
+soupsieve==2.0.1
+waitress==1.4.4
+webtest==2.0.35
