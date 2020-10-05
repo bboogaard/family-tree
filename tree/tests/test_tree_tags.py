@@ -1,6 +1,7 @@
 from django.template import Context, RequestContext, Template
 from pyquery import PyQuery
 
+from tree.tests import factories
 from tree.tests.testcases import TreeTestCase
 
 
@@ -48,6 +49,14 @@ class TestTreeTags(TreeTestCase):
         self.spouse_1.full_clean()
         self.spouse_1.save()
 
+        self.spouse_2.firstname = 'Donald'
+        self.spouse_2.lastname = 'Friend'
+        self.spouse_2.birthyear = 1860
+        self.spouse_2.year_of_death = 1934
+        self.spouse_2.slug = ''
+        self.spouse_2.full_clean()
+        self.spouse_2.save()
+
         self.generation_2[0].firstname = 'Johnny'
         self.generation_2[0].lastname = 'Glass'
         self.generation_2[0].birthyear = 1871
@@ -63,6 +72,14 @@ class TestTreeTags(TreeTestCase):
         self.generation_2[1].full_clean()
         self.generation_2[1].slug = ''
         self.generation_2[1].save()
+
+        self.generation_extra[0].firstname = 'Minny'
+        self.generation_extra[0].lastname = 'Friend'
+        self.generation_extra[0].birthyear = 1888
+        self.generation_extra[0].year_of_death = 1953
+        self.generation_extra[0].full_clean()
+        self.generation_extra[0].slug = ''
+        self.generation_extra[0].save()
 
     def render(self, value, **kwargs):
         request = kwargs.get('request')
@@ -115,8 +132,7 @@ class TestTreeTags(TreeTestCase):
         output = self.render(
             '{% render_ancestor ancestor %}',
             ancestor=self.generation_1[0],
-            root_ancestor=self.top_male,
-            descendant=self.generation_2[0]
+            root_ancestor=self.top_male
         )
         doc = PyQuery(output)
 
@@ -131,3 +147,68 @@ class TestTreeTags(TreeTestCase):
         result = doc.text()
         expected = 'Martin Glass (1836 - 1901)'
         self.assertEqual(result, expected)
+
+    def test_render_ancestor_parent_visible(self):
+        output = self.render(
+            '{% render_ancestor ancestor %}',
+            ancestor=self.generation_1[0],
+            root_ancestor=self.top_male,
+            flat_ancestors=[self.top_male]
+        )
+        doc = PyQuery(output)
+
+        result = doc.attr('class')
+        expected = 'male'
+        self.assertEqual(result, expected)
+
+        result = doc.attr('data-url')
+        self.assertIsNone(result)
+
+        result = doc.text()
+        expected = 'Martin Glass (1836 - 1901)'
+        self.assertEqual(result, expected)
+
+    def test_render_ancestor_different_lineage(self):
+        factories.LineageFactory(
+            ancestor=self.generation_1[1],
+            descendant=self.generation_extra[0]
+        )
+
+        output = self.render(
+            '{% render_ancestor ancestor %}',
+            ancestor=self.generation_1[1],
+            root_ancestor=self.top_male
+        )
+        doc = PyQuery(output)
+
+        result = doc.attr('class')
+        expected = 'female'
+        self.assertEqual(result, expected)
+
+        result = doc.attr('data-url')
+        expected = '/stamboom/priscilla-glass-1840-1910/'
+        self.assertEqual(result, expected)
+
+        result = doc.text()
+        expected = 'Priscilla Glass (1840 - 1910)'
+        self.assertEqual(result, expected)
+
+    def test_render_ancestor_with_css_class(self):
+        output = self.render(
+            '{% render_ancestor ancestor css_class=css_class %}',
+            ancestor=self.generation_1[0],
+            root_ancestor=self.top_male,
+            css_class='foo'
+        )
+        doc = PyQuery(output)
+
+        result = doc.attr('class')
+        expected = 'male foo'
+        self.assertEqual(result, expected)
+
+    def test_render_ancestor_no_root_ancestor(self):
+        output = self.render(
+            '{% render_ancestor ancestor css_class=css_class %}',
+            ancestor=self.generation_1[0]
+        )
+        self.assertEqual(output, '')
