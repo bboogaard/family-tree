@@ -53,19 +53,14 @@ def render_tree(context, ancestor, descendant):
 @register.simple_tag(takes_context=True)
 def render_ancestor(context, ancestor, css_class=None):
     root_ancestor = context.get('root_ancestor')
-    descendant = context.get('descendant')
-    if not root_ancestor or not descendant:
+    if not root_ancestor:
         return ''
 
-    lineage = ancestor.get_lineage()
-
-    if (
-            lineage and (
-                ancestor != root_ancestor or lineage.descendant != descendant
-            )):
-        descendant = lineage.descendant
-    else:
-        descendant = None
+    descendant = None
+    if ancestor != root_ancestor:
+        lineage = ancestor.get_lineage()
+        if lineage:
+            descendant = lineage.descendant
 
     parent = helpers.get_parent(
         ancestor, context.get('flat_ancestors', [])
