@@ -2,8 +2,8 @@
 Models for the tree app.
 
 """
-from django.db.models import CharField, Exists, OuterRef, Q, \
 from django.db import models, transaction
+from django.db.models import CharField, Exists, OuterRef, Prefetch, Q, \
     Value as V, When
 from django.db.models.functions import Cast, Concat
 from django.db.models.signals import post_save
@@ -37,6 +37,28 @@ class AncestorQuerySet(models.QuerySet):
                     self.model.objects
                     .filter(
                         Q(father=OuterRef('pk')) | Q(mother=OuterRef('pk'))
+                    )
+                )
+            )
+        )
+
+        return queryset
+
+    def with_marriages(self):
+        queryset = self._clone()
+
+        queryset = (
+            queryset.prefetch_related(
+                Prefetch(
+                    'marriages_of_husband',
+                    queryset=Marriage.objects.select_related(
+                        'wife'
+                    )
+                ),
+                Prefetch(
+                    'marriages_of_wife',
+                    queryset=Marriage.objects.select_related(
+                        'husband'
                     )
                 )
             )
@@ -257,7 +279,11 @@ class Ancestor(models.Model):
 
     def get_lineage(self):
         try:
-            return Lineage.objects.get(ancestor=self)
+            return (
+                Lineage.objects
+                .select_related('descendant')
+                .get(ancestor=self)
+            )
         except Lineage.DoesNotExist:
             pass
 

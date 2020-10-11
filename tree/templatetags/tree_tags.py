@@ -7,7 +7,7 @@ import itertools
 from django import template
 from django.template.loader import render_to_string
 
-from tree import helpers
+from tree import models, helpers
 
 
 register = template.Library()
@@ -15,19 +15,25 @@ register = template.Library()
 
 @register.inclusion_tag('templatetags/tree.html', takes_context=True)
 def render_tree(context, ancestor, descendant):
+    marriages = []
+
     if ancestor.gender == 'm':
-        marriages = []
         for marriage in ancestor.marriages_of_husband.all():
-            children = ancestor.children_of_father.filter(
-                mother=marriage.wife
-            ).order_by_age()
+            children = (
+                ancestor.children_of_father
+                .filter(mother=marriage.wife)
+                .with_marriages()
+                .order_by_age()
+            )
             marriages.append((ancestor, marriage.wife, children))
     elif ancestor.gender == 'f':
-        marriages = []
         for marriage in ancestor.marriages_of_wife.all():
-            children = ancestor.children_of_father.filter(
-                father=marriage.husband
-            ).order_by_age()
+            children = (
+                ancestor.children_of_mother
+                .filter(father=marriage.husband)
+                .with_marriages()
+                .order_by_age()
+            )
             marriages.append((ancestor, marriage.husband, children))
 
     root_ancestor = context.get('root_ancestor', ancestor)
