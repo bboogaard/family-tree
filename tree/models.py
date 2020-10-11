@@ -2,11 +2,14 @@
 Models for the tree app.
 
 """
-from django.db import models
 from django.db.models import CharField, Exists, OuterRef, Q, \
+from django.db import models, transaction
     Value as V, When
 from django.db.models.functions import Cast, Concat
+from django.db.models.signals import post_save
 from django.utils.text import slugify
+
+from tree.helpers import LineageFinder
 
 
 class AncestorQuerySet(models.QuerySet):
@@ -319,3 +322,61 @@ class Lineage(models.Model):
 
     def __str__(self):
         return '{} > {}'.format(str(self.ancestor), str(self.descendant))
+
+
+class GenerationManager(models.Manager):
+    """Custom manager for the Generation model."""
+
+    @transaction.atomic()
+    def build_generations(self, sender, **kwargs):
+        lineage = kwargs.get('instance')
+        lineage.generations.all().delete()
+        generations = LineageFinder().build(
+            lineage.ancestor, lineage.descendant
+        )
+        generation_objects = [
+            self.model(
+                lineage=lineage, ancestor=ancestor, generation=generation
+            )
+            for ancestor, generation in generations
+        ]
+        self.bulk_create(generation_objects)
+
+
+class Generation(models.Model):
+    """Contains intermediate generations within a lineage.
+
+    Note that this is filled by the app.
+
+    """
+
+    lineage = models.ForeignKey(
+        Lineage,
+        on_delete=models.CASCADE,
+        related_name='generations',
+        verbose_name='Afstamming'
+    )
+
+    ancestor = models.ForeignKey(
+        Ancestor,
+        on_delete=models.CASCADE,
+        related_name='generations',
+        verbose_name='Voorouder'
+    )
+
+    generation = models.IntegerField('Generatie')
+
+    objects = GenerationManager()
+
+    class Meta:
+        indexes = [models.Index(fields=['lineage', 'generation'])]
+        ordering = ['lineage', 'generation']
+        unique_together = ['lineage', 'ancestor']
+        verbose_name = 'Generatie'
+        verbose_name_plural = 'Generaties'
+
+    def __str__(self):
+        return '{} ({})'.format(str(self.lineage), str(self.generation))
+
+
+post_save.connect(Generation.objects.build_generations, sender=Lineage)

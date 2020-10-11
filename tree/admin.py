@@ -4,6 +4,7 @@ Django-admin integration for the tree app.
 """
 from django import forms
 from django.contrib import admin
+from nested_inline.admin import NestedStackedInline, NestedModelAdmin
 
 from tree import models
 
@@ -61,6 +62,21 @@ class MarriageOfWifeInLine(admin.TabularInline):
     form = MarriageForm
 
 
+class GenerationInLine(NestedStackedInline):
+
+    extra = 0
+
+    model = models.Generation
+
+    read_only_fields = ['lineage', 'ancestor', 'generation']
+
+    # def has_add_permission(self, request, obj=None):
+        # return False
+
+    # def has_delete_permission(self, request, obj=None):
+        # return False
+
+
 class LineageForm(forms.ModelForm):
 
     class Meta:
@@ -72,7 +88,7 @@ class LineageForm(forms.ModelForm):
         }
 
 
-class LineageInLine(admin.TabularInline):
+class LineageInLine(NestedStackedInline):
 
     model = models.Lineage
 
@@ -81,6 +97,8 @@ class LineageInLine(admin.TabularInline):
     fk_name = 'ancestor'
 
     form = LineageForm
+
+    inlines = [GenerationInLine]
 
 
 class AncestorForm(forms.ModelForm):
@@ -133,7 +151,7 @@ class MotherFilter(AncestorFilter):
     title = 'Moeder'
 
 
-class AncestorAdmin(admin.ModelAdmin):
+class AncestorAdmin(NestedModelAdmin):
 
     inlines = [MarriageOfHusbandInLine, MarriageOfWifeInLine, LineageInLine]
 

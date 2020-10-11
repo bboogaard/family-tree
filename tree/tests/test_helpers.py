@@ -8,13 +8,6 @@ from tree.tests.testcases import TreeTestCase
 
 class TestHelpers(TreeTestCase):
 
-    def test_get_lineage(self):
-        result = helpers.get_lineage(self.top_male, self.generation_2[0])
-        expected = [
-            self.top_male, self.top_female, self.generation_1[0], self.spouse_1
-        ]
-        self.assertItemsEqual(result, expected)
-
     def test_get_parent(self):
         result = helpers.get_parent(
             descendant=self.generation_1[0],

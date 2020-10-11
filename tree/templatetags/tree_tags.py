@@ -31,7 +31,6 @@ def render_tree(context, ancestor, descendant):
             marriages.append((ancestor, marriage.husband, children))
 
     root_ancestor = context.get('root_ancestor', ancestor)
-    lineage = context.get('lineage', helpers.get_lineage(ancestor, descendant))
 
     flat_ancestors = context.get('flat_ancestors', [])
     flat_ancestors.extend(
@@ -43,7 +42,6 @@ def render_tree(context, ancestor, descendant):
     context.update({
         'marriages': marriages,
         'root_ancestor': root_ancestor,
-        'lineage': lineage,
         'descendant': descendant,
         'flat_ancestors': flat_ancestors
     })
@@ -53,12 +51,13 @@ def render_tree(context, ancestor, descendant):
 @register.simple_tag(takes_context=True)
 def render_ancestor(context, ancestor, css_class=None):
     root_ancestor = context.get('root_ancestor')
-    if not root_ancestor:
+    lineages = context.get('lineages')
+    if not root_ancestor or not lineages:
         return ''
 
     descendant = None
     if ancestor != root_ancestor:
-        lineage = ancestor.get_lineage()
+        lineage = lineages.get(ancestor.pk)
         if lineage:
             descendant = lineage.descendant
 
@@ -66,7 +65,7 @@ def render_ancestor(context, ancestor, css_class=None):
         ancestor, context.get('flat_ancestors', [])
     )
     if parent:
-        parent_lineage = parent.get_lineage()
+        parent_lineage = lineages.get(parent.pk)
         if parent_lineage:
             parent = {
                 'instance': parent,

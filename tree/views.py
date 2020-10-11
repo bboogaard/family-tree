@@ -47,6 +47,18 @@ def tree(request, ancestor=None, descendant=None):
         'tree.html',
         {
             'root_ancestor': ancestor_obj,
-            'descendant': descendant_obj
+            'descendant': descendant_obj,
+            'lineage': [
+                generation.ancestor
+                for generation in (
+                    lineage.generations.select_related('ancestor').all()
+                )
+            ],
+            'lineages': (
+                models.Lineage
+                .objects
+                .select_related('descendant')
+                .in_bulk(field_name='ancestor_id')
+            )
         }
     )

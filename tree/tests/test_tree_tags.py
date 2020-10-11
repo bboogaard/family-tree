@@ -1,6 +1,7 @@
 from django.template import Context, RequestContext, Template
 from pyquery import PyQuery
 
+from tree import models
 from tree.tests import factories
 from tree.tests.testcases import TreeTestCase
 
@@ -81,6 +82,13 @@ class TestTreeTags(TreeTestCase):
         self.generation_extra[0].full_clean()
         self.generation_extra[0].save()
 
+        self.lineages = (
+            models.Lineage
+            .objects
+            .select_related('descendant')
+            .in_bulk(field_name='ancestor_id')
+        )
+
     def render(self, value, **kwargs):
         request = kwargs.get('request')
         context = RequestContext(kwargs) if request else Context(kwargs)
@@ -88,10 +96,18 @@ class TestTreeTags(TreeTestCase):
         return template.render(context)
 
     def test_render_tree(self):
+        lineage = self.top_male.get_lineage()
         output = self.render(
             '{% render_tree ancestor descendant %}',
             ancestor=self.top_male,
-            descendant=self.generation_2[0]
+            descendant=self.generation_2[0],
+            lineage=[
+                generation.ancestor
+                for generation in (
+                    lineage.generations.select_related('ancestor').all()
+                )
+            ],
+            lineages=self.lineages
         )
         doc = PyQuery(output)
         marriages = doc.find('.marriage')
@@ -132,7 +148,8 @@ class TestTreeTags(TreeTestCase):
         output = self.render(
             '{% render_ancestor ancestor %}',
             ancestor=self.generation_1[0],
-            root_ancestor=self.top_male
+            root_ancestor=self.top_male,
+            lineages=self.lineages
         )
         doc = PyQuery(output)
 
@@ -153,7 +170,8 @@ class TestTreeTags(TreeTestCase):
             '{% render_ancestor ancestor %}',
             ancestor=self.generation_1[0],
             root_ancestor=self.top_male,
-            flat_ancestors=[self.top_male]
+            flat_ancestors=[self.top_male],
+            lineages=self.lineages
         )
         doc = PyQuery(output)
 
@@ -174,10 +192,18 @@ class TestTreeTags(TreeTestCase):
             descendant=self.generation_extra[0]
         )
 
+        lineages = (
+            models.Lineage
+            .objects
+            .select_related('descendant')
+            .in_bulk(field_name='ancestor_id')
+        )
+
         output = self.render(
             '{% render_ancestor ancestor %}',
             ancestor=self.generation_1[1],
-            root_ancestor=self.top_male
+            root_ancestor=self.top_male,
+            lineages=lineages
         )
         doc = PyQuery(output)
 
@@ -198,7 +224,8 @@ class TestTreeTags(TreeTestCase):
             '{% render_ancestor ancestor css_class=css_class %}',
             ancestor=self.generation_1[0],
             root_ancestor=self.top_male,
-            css_class='foo'
+            css_class='foo',
+            lineages=self.lineages
         )
         doc = PyQuery(output)
 
@@ -209,6 +236,7 @@ class TestTreeTags(TreeTestCase):
     def test_render_ancestor_no_root_ancestor(self):
         output = self.render(
             '{% render_ancestor ancestor css_class=css_class %}',
-            ancestor=self.generation_1[0]
+            ancestor=self.generation_1[0],
+            lineages=self.lineages
         )
         self.assertEqual(output, '')
