@@ -1,3 +1,4 @@
+{% load cache %}
 {% load static %}
 {% load tree_tags %}
 
@@ -17,7 +18,9 @@
     <h1>Stamboom van {{ root_ancestor }}</h1>
     <ul class="tree">
         <li class="root">
+        {% cache 3600 tree root_ancestor descendant %}
         {% render_tree root_ancestor descendant %}
+        {% endcache %}
         </li>
     </ul>
 
