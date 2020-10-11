@@ -1,12 +1,21 @@
-import operator
-
-from django.test import TestCase
-
-from tree import helpers
+from tree import helpers, models
 from tree.tests.testcases import TreeTestCase
 
 
 class TestHelpers(TreeTestCase):
+
+    with_persistent_names = True
+
+    def test_build_lineage(self):
+        lineage = models.Lineage.objects.select_related(
+            'ancestor', 'descendant'
+        ).get(pk=self.lineage.pk)
+        with self.assertNumQueries(2):
+            result = helpers.build_lineage(lineage)
+        expected = [
+            (self.generation_1[0], 1)
+        ]
+        self.assertEqual(result, expected)
 
     def test_get_parent(self):
         result = helpers.get_parent(

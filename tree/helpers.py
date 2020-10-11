@@ -5,16 +5,16 @@ Helpers for the tree app.
 from django.core.exceptions import ObjectDoesNotExist
 
 
-class LineageFinder(object):
+class LineageBuilder(object):
 
     def __init__(self):
         self._descendant = None
         self._generations = []
         self._cache = {}
 
-    def build(self, ancestor, descendant, generation=1):
+    def build(self, lineage):
         self._generations = []
-        self._get_generations(ancestor, descendant, generation)
+        self._get_generations(lineage.ancestor, lineage.descendant, 1)
         return self._generations
 
     def _get_generations(self, ancestor, descendant, generation):
@@ -48,10 +48,14 @@ class LineageFinder(object):
     def _get_children(self, ancestor):
         children = self._cache.get(ancestor.pk)
         if not children:
-            children = list(ancestor.children.all())
+            children = list(ancestor.children.order_by_age())
             self._cache[ancestor.pk] = children
 
         return children
+
+
+def build_lineage(lineage):
+    return LineageBuilder().build(lineage)
 
 
 def get_parent(descendant, visible_ancestors):

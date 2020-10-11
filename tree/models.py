@@ -9,7 +9,7 @@ from django.db.models.functions import Cast, Concat
 from django.db.models.signals import post_save
 from django.utils.text import slugify
 
-from tree.helpers import LineageFinder
+from tree.helpers import build_lineage
 
 
 class AncestorQuerySet(models.QuerySet):
@@ -357,9 +357,7 @@ class GenerationManager(models.Manager):
     def build_generations(self, sender, **kwargs):
         lineage = kwargs.get('instance')
         lineage.generations.all().delete()
-        generations = LineageFinder().build(
-            lineage.ancestor, lineage.descendant
-        )
+        generations = build_lineage(lineage)
         generation_objects = [
             self.model(
                 lineage=lineage, ancestor=ancestor, generation=generation
