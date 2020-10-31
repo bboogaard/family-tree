@@ -9,8 +9,6 @@ from django.db.models.functions import Cast, Concat
 from django.db.models.signals import post_save
 from django.utils.text import slugify
 
-from tree.helpers import build_lineage
-
 
 class AncestorQuerySet(models.QuerySet):
     """Custom QuerySet for the Ancestor model."""
@@ -324,6 +322,39 @@ class Marriage(models.Model):
         return '{} x {}'.format(str(self.husband), str(self.wife))
 
 
+class LineageQuerySet(models.QuerySet):
+    """Custom QuerySet for the Lineage model."""
+
+    def for_ancestor(self, ancestor):
+        queryset = self._clone()
+
+        generations = (
+            Generation.objects
+            .filter(lineage__ancestor=ancestor)
+            .select_related(
+                'ancestor__father'
+            )
+            .prefetch_related(
+                'ancestor__father__children_of_father__marriages_of_husband',
+                'ancestor__father__children_of_father__marriages_of_wife',
+            )
+        )
+
+        candidates = [ancestor.pk]
+        for generation in generations:
+            siblings = generation.ancestor.father.children.all()
+            for child in siblings:
+                candidates.append(child.pk)
+                if child.gender == 'm':
+                    for marriage in child.marriages_of_husband.all():
+                        candidates.append(marriage.wife_id)
+                elif child.gender == 'f':
+                    for marriage in child.marriages_of_wife.all():
+                        candidates.append(marriage.husband_id)
+
+        return queryset.filter(ancestor__in=candidates)
+
+
 class Lineage(models.Model):
     """Model for lineage data."""
 
@@ -341,6 +372,8 @@ class Lineage(models.Model):
         verbose_name='Nakomeling'
     )
 
+    objects = LineageQuerySet.as_manager()
+
     class Meta:
         unique_together = ['ancestor', 'descendant']
         verbose_name = 'Afstamming'
@@ -355,6 +388,8 @@ class GenerationManager(models.Manager):
 
     @transaction.atomic()
     def build_generations(self, sender, **kwargs):
+        from tree.helpers import build_lineage
+
         lineage = kwargs.get('instance')
         lineage.generations.all().delete()
         generations = build_lineage(lineage)

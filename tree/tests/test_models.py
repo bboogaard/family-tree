@@ -1,4 +1,7 @@
+import operator
+
 from tree import models
+from tree.tests.factories import LineageFactory
 from tree.tests.testcases import TreeTestCase
 
 
@@ -285,6 +288,28 @@ class TestMarriage(TreeTestCase):
         marriage = ancestor.marriages.first()
         result = str(marriage)
         expected = str(self.top_male) + ' x ' + str(self.top_female)
+        self.assertEqual(result, expected)
+
+
+class TestLineageQuerySet(TreeTestCase):
+
+    with_persistent_names = True
+
+    def test_for_ancestor(self):
+        lineage = LineageFactory(
+            ancestor=self.generation_1[1], descendant=self.generation_extra[0]
+        )
+
+        # Query count:
+        # Generation query (1)
+        # Children of father (1)
+        # Marriages of husband (1)
+        # Marriages of wife (1)
+
+        with self.assertNumQueries(4):
+            queryset = models.Lineage.objects.for_ancestor(self.top_male)
+        result = list(queryset.order_by('id'))
+        expected = sorted([self.lineage, lineage], key=operator.attrgetter('id'))
         self.assertEqual(result, expected)
 
 

@@ -6,10 +6,11 @@ from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 
-from tree import helpers, models
+from tree import models
+from tree.helpers import get_lineages
 
 
-def tree(request, ancestor=None, descendant=None):
+def tree(request, ancestor=None):
     """Build and render the tree."""
     if not ancestor:
         kwargs = {
@@ -21,44 +22,19 @@ def tree(request, ancestor=None, descendant=None):
         }
 
     ancestor_obj = get_object_or_404(models.Ancestor, **kwargs)
-    lineage = ancestor_obj.get_lineage()
+    lineages = get_lineages(ancestor_obj)
 
-    if not descendant:
-        if not lineage:
-            raise Http404()
-        descendant_obj = lineage.descendant
-    else:
-        descendant_obj = get_object_or_404(models.Ancestor, slug=descendant)
+    if not lineages.root:
+        raise Http404()
 
-    if ancestor and descendant:
-        if lineage and lineage.descendant == descendant_obj:
-            if ancestor_obj.is_root:
-                return redirect(reverse('tree'), permanent=True)
-            else:
-                return redirect(reverse('ancestor_tree', kwargs={
-                    'ancestor': ancestor
-                }), permanent=True)
-    elif ancestor:
-        if ancestor_obj.is_root:
-            return redirect(reverse('tree'), permanent=True)
+    if ancestor and ancestor_obj.is_root:
+        return redirect(reverse('tree'), permanent=True)
 
     return render(
         request,
         'tree.html',
         {
             'root_ancestor': ancestor_obj,
-            'descendant': descendant_obj,
-            'lineage': [
-                generation.ancestor
-                for generation in (
-                    lineage.generations.select_related('ancestor').all()
-                )
-            ],
-            'lineages': (
-                models.Lineage
-                .objects
-                .select_related('descendant')
-                .in_bulk(field_name='ancestor_id')
-            )
+            'lineages': lineages
         }
     )

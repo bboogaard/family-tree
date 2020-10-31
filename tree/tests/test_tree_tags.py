@@ -1,7 +1,7 @@
 from django.template import Context, RequestContext, Template
 from pyquery import PyQuery
 
-from tree import models
+from tree import helpers, models
 from tree.tests import factories
 from tree.tests.testcases import TreeTestCase
 
@@ -12,13 +12,7 @@ class TestTreeTags(TreeTestCase):
 
     def setUp(self):
         super().setUp()
-
-        self.lineages = (
-            models.Lineage
-            .objects
-            .select_related('descendant')
-            .in_bulk(field_name='ancestor_id')
-        )
+        self.lineages = helpers.get_lineages(self.top_male)
 
     def render(self, value, **kwargs):
         request = kwargs.get('request')
@@ -27,17 +21,10 @@ class TestTreeTags(TreeTestCase):
         return template.render(context)
 
     def test_render_tree(self):
-        lineage = self.top_male.get_lineage()
         output = self.render(
-            '{% render_tree ancestor descendant %}',
+            '{% render_tree ancestor %}',
             ancestor=self.top_male,
-            descendant=self.generation_2[0],
-            lineage=[
-                generation.ancestor
-                for generation in (
-                    lineage.generations.select_related('ancestor').all()
-                )
-            ],
+            root_ancestor=self.top_male,
             lineages=self.lineages
         )
         doc = PyQuery(output)
@@ -89,7 +76,7 @@ class TestTreeTags(TreeTestCase):
         self.assertEqual(result, expected)
 
         result = doc.attr('data-url')
-        expected = '/stamboom/john-glass-1812-1874/johnny-glass-1871-1952'
+        expected = '/stamboom/john-glass-1812-1874'
         self.assertEqual(result, expected)
 
         result = doc.text()
@@ -143,7 +130,7 @@ class TestTreeTags(TreeTestCase):
         self.assertEqual(result, expected)
 
         result = doc.attr('data-url')
-        expected = '/stamboom/priscilla-glass-1840-1910/minny-friend-1888-1953'
+        expected = '/stamboom/priscilla-glass-1840-1910'
         self.assertEqual(result, expected)
 
         result = doc.text()

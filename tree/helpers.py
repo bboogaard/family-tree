@@ -2,7 +2,8 @@
 Helpers for the tree app.
 
 """
-from django.core.exceptions import ObjectDoesNotExist
+from tree import models
+from tree.lineage import Lineages
 
 
 class LineageBuilder(object):
@@ -58,10 +59,14 @@ def build_lineage(lineage):
     return LineageBuilder().build(lineage)
 
 
+def get_lineages(ancestor):
+    return Lineages(ancestor)
+
+
 def get_parent(descendant, visible_ancestors):
     try:
         parent = descendant.father
-    except ObjectDoesNotExist:
+    except models.Ancestor.DoesNotExist:
         return
 
     if parent in visible_ancestors:

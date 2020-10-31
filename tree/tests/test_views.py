@@ -8,7 +8,6 @@ class TestTreeView(TreeViewTest):
 
     def setUp(self):
         super().setUp()
-
         factories.LineageFactory(
             ancestor=self.generation_1[1], descendant=self.generation_extra[0]
         )
@@ -18,40 +17,15 @@ class TestTreeView(TreeViewTest):
         self.assertEqual(response.status_code, 200)
 
     def test_get_root_ancestor(self):
-        response = self.app.get('/stamboom/john-glass-1812-1874/')
-        self.assertEqual(response.status_code, 301)
-        self.assertEqual(response.location, '/stamboom/')
-
-    def test_get_root_ancestor_with_descendant(self):
-        response = self.app.get(
-            '/stamboom/john-glass-1812-1874/donald-friend-1890-1961')
-        self.assertEqual(response.status_code, 200)
-
-    def test_get_root_ancestor_with_descendant_from_lineage(self):
-        response = self.app.get(
-            '/stamboom/john-glass-1812-1874/johnny-glass-1871-1952')
+        response = self.app.get('/stamboom/john-glass-1812-1874')
         self.assertEqual(response.status_code, 301)
         self.assertEqual(response.location, '/stamboom/')
 
     def test_get_ancestor(self):
         response = self.app.get(
-            '/stamboom/priscilla-glass-1840-1910/'
+            '/stamboom/priscilla-glass-1840-1910'
         )
         self.assertEqual(response.status_code, 200)
-
-    def test_get_ancestor_with_descendant(self):
-        response = self.app.get(
-            '/stamboom/priscilla-glass-1840-1910/donald-friend-1890-1961'
-        )
-        self.assertEqual(response.status_code, 200)
-
-    def test_get_ancestor_with_descendant_from_lineage(self):
-        response = self.app.get(
-            '/stamboom/priscilla-glass-1840-1910/minny-friend-1888-1953'
-        )
-        self.assertEqual(response.status_code, 301)
-        self.assertEqual(
-            response.location, '/stamboom/priscilla-glass-1840-1910/')
 
     def test_get_root_ancestor_not_found(self):
         self.top_male.is_root = False
@@ -62,7 +36,7 @@ class TestTreeView(TreeViewTest):
 
     def test_get_ancestor_not_found(self):
         response = self.app.get(
-            '/stamboom/priscilla-glass-1839-1910/', expect_errors=True
+            '/stamboom/priscilla-glass-1839-1910', expect_errors=True
         )
         self.assertEqual(response.status_code, 404)
 
@@ -78,18 +52,5 @@ class TestTreeView(TreeViewTest):
 
     def test_get_ancestor_no_lineage(self):
         response = self.app.get(
-            '/stamboom/martin-glass-1836-1901/', expect_errors=True)
-        self.assertEqual(response.status_code, 404)
-
-    def test_get_root_ancestor_with_descendant_not_found(self):
-        response = self.app.get(
-            '/stamboom/john-glass-1812-1874/donald-friend-1889-1961',
-            expect_errors=True)
-        self.assertEqual(response.status_code, 404)
-
-    def test_get_ancestor_with_descendant_not_found(self):
-        response = self.app.get(
-            '/stamboom/priscilla-glass-1840-1910/donald-friend-1889-1961',
-            expect_errors=True
-        )
+            '/stamboom/martin-glass-1836-1901', expect_errors=True)
         self.assertEqual(response.status_code, 404)

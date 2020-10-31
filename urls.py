@@ -24,10 +24,7 @@ from tree.views import tree
 urlpatterns = [
     path('admin/', admin.site.urls),
     re_path(r'^stamboom/$', tree, name='tree'),
-    re_path(r'^stamboom/(?P<ancestor>[^/]+)/$', tree, name='ancestor_tree'),
-    re_path(
-        r'^stamboom/(?P<ancestor>[^/]+)/(?P<descendant>[^/]+)$', tree,
-        name='lineage_tree'),
+    re_path(r'^stamboom/(?P<ancestor>[^/]+)$', tree, name='ancestor_tree'),
 ]
 
 if settings.DEBUG:
