@@ -1,3 +1,6 @@
+import sentry_sdk
+from sentry_sdk.integrations.django import DjangoIntegration
+
 from settings.base import *
 
 ALLOWED_HOSTS = ['127.0.0.1']
@@ -15,11 +18,11 @@ STATIC_ROOT = '/home/bboogaard/media/py-wikkel/staticfiles'
 EMAIL_HOST = 'smtp.mailtrap.io'
 EMAIL_HOST_PORT = 587
 
-import sentry_sdk
-from sentry_sdk.integrations.django import DjangoIntegration
-
 sentry_sdk.init(
-    dsn="https://bdf806f0125c4e1db409a1fc40f6058d@o480290.ingest.sentry.io/5527044",
+    dsn=(
+        "https://bdf806f0125c4e1db409a1fc40f6058d@o480290"
+        ".ingest.sentry.io/5527044"
+    ),
     integrations=[DjangoIntegration()],
     traces_sample_rate=1.0,
 
@@ -29,4 +32,3 @@ sentry_sdk.init(
 )
 
 PRODUCTION_ENV = True
-
