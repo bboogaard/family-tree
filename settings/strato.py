@@ -7,8 +7,6 @@ SITE_URL = 'https://py-wikkel.nl'
 
 STATIC_URL = 'https://py-wikkel.nl/static/'
 
-STATIC_ROOT = BASE_DIR / 'staticfiles'
-
 # django-debug-toolbar
 
 # E-mail (Add user/pass...)
