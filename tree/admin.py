@@ -70,12 +70,6 @@ class GenerationInLine(NestedStackedInline):
 
     read_only_fields = ['lineage', 'ancestor', 'generation']
 
-    # def has_add_permission(self, request, obj=None):
-        # return False
-
-    # def has_delete_permission(self, request, obj=None):
-        # return False
-
 
 class LineageForm(forms.ModelForm):
 

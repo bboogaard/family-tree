@@ -309,7 +309,9 @@ class TestLineageQuerySet(TreeTestCase):
         with self.assertNumQueries(4):
             queryset = models.Lineage.objects.for_ancestor(self.top_male)
         result = list(queryset.order_by('id'))
-        expected = sorted([self.lineage, lineage], key=operator.attrgetter('id'))
+        expected = sorted(
+            [self.lineage, lineage], key=operator.attrgetter('id')
+        )
         self.assertEqual(result, expected)
 
 
