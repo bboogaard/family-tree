@@ -12,5 +12,3 @@ STATIC_URL = 'http://py-wikkel.nl/static/'
 # E-mail (Add user/pass...)
 EMAIL_HOST = 'smtp.mailtrap.io'
 EMAIL_HOST_PORT = 587
-EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
