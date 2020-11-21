@@ -3,9 +3,11 @@ from settings.base import *
 ALLOWED_HOSTS = ['127.0.0.1']
 
 # Site url
-SITE_URL = 'http://py-wikkel.nl'
+SITE_URL = 'https://py-wikkel.nl'
 
-STATIC_URL = 'http://py-wikkel.nl/static/'
+STATIC_URL = 'https://py-wikkel.nl/static/'
+
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # django-debug-toolbar
 
