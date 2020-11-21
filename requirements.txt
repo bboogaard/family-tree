@@ -23,3 +23,6 @@ webtest==2.0.35
 python-memcached==1.59
 django-cache-memoize==0.1.7
 django-nested-inline==0.4.2
+certifi==2020.11.8
+sentry-sdk==0.19.4
+urllib3==1.26.2
