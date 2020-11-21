@@ -139,3 +139,5 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [
     BASE_DIR / "static"
 ]
+
+PRODUCTION_ENV = False
