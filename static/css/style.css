@@ -18,7 +18,6 @@ ul.tree ul {
 }
 ul.tree li {
     padding: 0 7px;
-    line-height: 20px;
     color: #000;
     border-left: 1px solid rgb(100,100,100);
     margin: 0px 0px 0px 200px;
@@ -75,6 +74,7 @@ div[data-url] {
     width: max-content;
     padding: 10px;
     margin-left: 93px;
+    max-height: 50px;
 }
 .spouse {
     margin-left: 5px;
