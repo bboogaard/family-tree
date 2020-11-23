@@ -1,1 +1,6 @@
-<div{% if parent %} data-balloon-visible aria-label="{{ parent.get_fullname }} {{ parent.instance.get_age }}" data-balloon-pos="up"{% endif %} class="{% if ancestor.gender == 'm' %}male{% else %}female{% endif %}{% if css_class %} {{ css_class }}{% endif %}"{% if ancestor != root_ancestor and ancestor.pk in lineages %} data-url="{% url 'ancestor_tree' ancestor=ancestor.slug %}"{% elif parent %} data-url="{% url 'ancestor_tree' ancestor=parent.slug %}"{% endif %}>{{ ancestor.get_fullname }} ({{ ancestor.get_age }})</div>
+<div{% if parents %} data-meta-id="meta-ancestor-{{ ancestor.pk }}"{% endif %} class="{% if ancestor.gender == 'm' %}male{% else %}female{% endif %}{% if css_class %} {{ css_class }}{% endif %}"{% if ancestor != root_ancestor and ancestor.pk in lineages %} data-url="{% url 'ancestor_tree' ancestor=ancestor.slug %}"{% endif %}>{{ ancestor.get_fullname }} ({{ ancestor.get_age }})</div>
+{% if parents %}
+<div style="display: none" id="meta-ancestor-{{ ancestor.pk }}">
+    Kind van{% if parents.father %} {{ parents.father }}{% endif %}{% if parents.mother %} {% if parents.father %} en{% endif %} {{ parents.mother }}{% endif %}
+</div>
+{% endif %}

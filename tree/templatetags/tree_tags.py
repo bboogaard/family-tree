@@ -57,7 +57,7 @@ def render_ancestor(context, ancestor, css_class=None):
     if not root_ancestor or not lineages:
         return ''
 
-    parent = helpers.get_parent(
+    parents = helpers.get_parents(
         ancestor, context.get('flat_ancestors', [])
     )
 
@@ -65,6 +65,6 @@ def render_ancestor(context, ancestor, css_class=None):
         'root_ancestor': root_ancestor,
         'lineages': lineages,
         'ancestor': ancestor,
-        'parent': parent,
+        'parents': parents,
         'css_class': css_class
     })

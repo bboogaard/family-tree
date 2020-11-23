@@ -10,34 +10,49 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge" />
 <title>Stamboom van {{ root_ancestor }}</title>
 <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
-<link rel="stylesheet" type="text/css" href="{% static 'css/balloon.css' %}">
 
 </head>
 <body>
-
     <h1>Stamboom van {{ root_ancestor }}</h1>
     <ul class="tree">
         <li class="root">
-        {% cache 3600 tree root_ancestor %}
+
         {% render_tree root_ancestor %}
-        {% endcache %}
+
         </li>
     </ul>
 
+    <script src="https://unpkg.com/popper.js@1"></script>
+    <script src="https://unpkg.com/tippy.js@5"></script>
+
     <script type="text/javascript">
         (function() {
-            var links = document.querySelectorAll("[data-url]");
 
-            for (var i = 0; i < links.length; i++) {
-                links[i].addEventListener(
-                    'click',
-                    function() {
-                        var url = this.getAttribute("data-url");
-                        location.href = url;
-                    },
-                    false
-                );
+            function addLinkEvents(links) {
+                for (var i = 0; i < links.length; i++) {
+                    links[i].addEventListener(
+                        'click',
+                        function followLink() {
+                            var url = this.getAttribute("data-url");
+                            location.href = url;
+                        },
+                        false
+                    );
+                }
             }
+
+            tippy('[data-meta-id]', {
+                content(reference) {
+                    const id = reference.getAttribute('data-meta-id');
+                    const template = document.getElementById(id);
+                    return template.innerHTML;
+                },
+                allowHTML: true,
+                interactive: true
+            });
+
+            var links = document.querySelectorAll("[data-url]");
+            addLinkEvents(links);
 
         })();
     </script>
