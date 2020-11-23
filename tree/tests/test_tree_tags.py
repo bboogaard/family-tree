@@ -76,7 +76,9 @@ class TestTreeTags(TreeTestCase):
         expected = 'Martin Glass (1836 - 1901)'
         self.assertEqual(result, expected)
 
-        element = PyQuery(doc.find('#meta-ancestor-{}'.format(self.generation_1[0].pk)))
+        element = PyQuery(
+            doc.find('#meta-ancestor-{}'.format(self.generation_1[0].pk))
+        )
         self.assertIn('/stamboom/john-glass-1812-1874', element.html())
 
     def test_render_ancestor_parent_visible(self):
