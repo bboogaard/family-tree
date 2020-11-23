@@ -2,7 +2,9 @@
 Helpers for the tree app.
 
 """
-from tree import models
+from django.urls import reverse
+from django.utils.html import format_html
+
 from tree.lineage import Lineages
 
 
@@ -63,13 +65,34 @@ def get_lineages(ancestor):
     return Lineages(ancestor)
 
 
-def get_parent(descendant, visible_ancestors):
-    try:
-        parent = descendant.father
-    except models.Ancestor.DoesNotExist:
-        return
+def get_parents(descendant, visible_ancestors):
+    father, father_link = _get_parent(descendant.father, visible_ancestors)
+    mother, mother_link = _get_parent(descendant.mother, visible_ancestors)
+    if not father and not mother or (not father_link and not mother_link):
+        return None
 
-    if parent in visible_ancestors:
-        return
+    return {
+        'father': father,
+        'mother': mother
+    }
 
-    return parent
+
+def _get_parent(parent, visible_ancestors):
+    if not parent:
+        return None, False
+
+    template_kwargs = {
+        'name': parent.get_fullname(),
+        'age': parent.get_age()
+    }
+    if all([parent not in visible_ancestors, parent.get_lineage()]):
+        template = '<a href="{url}">{name} ({age})</a>'
+        template_kwargs['url'] = reverse('ancestor_tree', kwargs={
+            'ancestor': parent.slug
+        })
+        has_link = True
+    else:
+        template = '{name} ({age})'
+        has_link = False
+
+    return format_html(template.format(**template_kwargs)), has_link

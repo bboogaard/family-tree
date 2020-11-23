@@ -70,18 +70,16 @@ class TestTreeTags(TreeTestCase):
             lineages=self.lineages
         )
         doc = PyQuery(output)
+        element = PyQuery(doc.find('.male'))
 
-        result = doc.attr('class')
-        expected = 'male'
-        self.assertEqual(result, expected)
-
-        result = doc.attr('data-url')
-        expected = '/stamboom/john-glass-1812-1874'
-        self.assertEqual(result, expected)
-
-        result = doc.text()
+        result = element.text()
         expected = 'Martin Glass (1836 - 1901)'
         self.assertEqual(result, expected)
+
+        element = PyQuery(
+            doc.find('#meta-ancestor-{}'.format(self.generation_1[0].pk))
+        )
+        self.assertIn('/stamboom/john-glass-1812-1874', element.html())
 
     def test_render_ancestor_parent_visible(self):
         output = self.render(
@@ -96,9 +94,6 @@ class TestTreeTags(TreeTestCase):
         result = doc.attr('class')
         expected = 'male'
         self.assertEqual(result, expected)
-
-        result = doc.attr('data-url')
-        self.assertIsNone(result)
 
         result = doc.text()
         expected = 'Martin Glass (1836 - 1901)'
@@ -124,16 +119,13 @@ class TestTreeTags(TreeTestCase):
             lineages=lineages
         )
         doc = PyQuery(output)
+        element = PyQuery(doc.find('.female'))
 
-        result = doc.attr('class')
-        expected = 'female'
-        self.assertEqual(result, expected)
-
-        result = doc.attr('data-url')
+        result = element.attr('data-url')
         expected = '/stamboom/priscilla-glass-1840-1910'
         self.assertEqual(result, expected)
 
-        result = doc.text()
+        result = element.text()
         expected = 'Priscilla Glass (1840 - 1910)'
         self.assertEqual(result, expected)
 
@@ -146,8 +138,9 @@ class TestTreeTags(TreeTestCase):
             lineages=self.lineages
         )
         doc = PyQuery(output)
+        element = PyQuery(doc.find('.male'))
 
-        result = doc.attr('class')
+        result = element.attr('class')
         expected = 'male foo'
         self.assertEqual(result, expected)
 

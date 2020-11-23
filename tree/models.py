@@ -341,6 +341,13 @@ class LineageQuerySet(models.QuerySet):
         )
 
         candidates = [ancestor.pk]
+        if ancestor.gender == 'm':
+            for marriage in ancestor.marriages_of_husband.all():
+                candidates.append(marriage.wife_id)
+        elif ancestor.gender == 'f':
+            for marriage in ancestor.marriages_of_wife.all():
+                candidates.append(marriage.husband_id)
+
         for generation in generations:
             siblings = generation.ancestor.father.children.all()
             for child in siblings:

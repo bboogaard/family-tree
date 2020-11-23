@@ -301,12 +301,13 @@ class TestLineageQuerySet(TreeTestCase):
         )
 
         # Query count:
+        # Marriages of ancestor (1)
         # Generation query (1)
         # Children of father (1)
         # Marriages of husband (1)
         # Marriages of wife (1)
 
-        with self.assertNumQueries(4):
+        with self.assertNumQueries(5):
             queryset = models.Lineage.objects.for_ancestor(self.top_male)
         result = list(queryset.order_by('id'))
         expected = sorted(
