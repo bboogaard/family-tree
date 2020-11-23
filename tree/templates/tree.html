@@ -16,8 +16,9 @@
     <h1>Stamboom van {{ root_ancestor }}</h1>
     <ul class="tree">
         <li class="root">
-
+        {% cache 3600 tree root_ancestor %}
         {% render_tree root_ancestor %}
+        {% endcache %}
 
         </li>
     </ul>
