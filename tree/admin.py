@@ -40,7 +40,7 @@ class MarriageForm(forms.ModelForm):
         }
 
 
-class MarriageOfHusbandInLine(admin.TabularInline):
+class MarriageOfHusbandInLine(NestedStackedInline):
 
     model = models.Marriage
 
@@ -51,7 +51,7 @@ class MarriageOfHusbandInLine(admin.TabularInline):
     form = MarriageForm
 
 
-class MarriageOfWifeInLine(admin.TabularInline):
+class MarriageOfWifeInLine(NestedStackedInline):
 
     model = models.Marriage
 

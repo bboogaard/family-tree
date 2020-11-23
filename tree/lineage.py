@@ -24,6 +24,7 @@ class Lineages(object):
     def __init__(self, ancestor):
         self.ancestor = ancestor
         self.cache_key = 'lineages-{}'.format(self.ancestor.pk)
+        self._objects = None
 
     def __getitem__(self, item):
         return self.objects[item]
@@ -40,6 +41,11 @@ class Lineages(object):
 
     @property
     def objects(self):
+        if self._objects is None:
+            self._objects = self._maybe_get_from_cache()
+        return self._objects
+
+    def _maybe_get_from_cache(self):
         objects = cache.get(self.cache_key)
         if objects is None:
             objects = self._get_objects()
