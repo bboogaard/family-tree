@@ -24,6 +24,7 @@ class Deployment(object):
         'manage.py',
         'requirements.txt',
         'urls.py',
+        'version.py',
         'wsgi.py'
     ]
 
