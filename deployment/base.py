@@ -96,12 +96,13 @@ class Deployment(object):
         return archive_name
 
     def create_static_archive(self):
-        shutil.rmtree(self.settings['STATIC_ROOT'])
+        if os.path.exists(self.settings['STATIC_ROOT']):
+            shutil.rmtree(self.settings['STATIC_ROOT'])
         self.local.local(
             'source {PYTHONPATH}/bin/activate && '
             'source {PYTHONPATH}/bin/postactivate && '
             'python manage.py collectstatic '
-            '--noinput --settings=settings.deployment'.format(
+            '--noinput --settings=settings.deploy'.format(
                 PYTHONPATH=self.settings['PYTHONPATH']
             )
         )
