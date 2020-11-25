@@ -7,7 +7,8 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 
 from tree import models
-from tree.helpers import get_lineages, get_version
+from tree.helpers import get_lineages
+from version import VERSION
 
 
 def tree(request, ancestor=None):
@@ -41,5 +42,5 @@ def tree(request, ancestor=None):
 
 
 def version(request):
-    content = 'Family Tree v. {}'.format(get_version())
+    content = 'Family Tree v. {}'.format(VERSION)
     return HttpResponse(content, content_type='text/plain')
