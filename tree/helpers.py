@@ -2,8 +2,10 @@
 Helpers for the tree app.
 
 """
+from django.conf import settings
 from django.urls import reverse
 from django.utils.html import format_html
+from git import Repo
 
 from tree.lineage import Lineages
 
@@ -96,3 +98,9 @@ def _get_parent(parent, visible_ancestors):
         has_link = False
 
     return format_html(template.format(**template_kwargs)), has_link
+
+
+def get_version():
+    repo = Repo(settings.BASE_DIR)
+    tags = sorted(repo.tags, key=lambda t: t.commit.committed_datetime)
+    return str(tags[-1])
