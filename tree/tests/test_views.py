@@ -54,3 +54,7 @@ class TestTreeView(TreeViewTest):
         response = self.app.get(
             '/stamboom/martin-glass-1836-1901', expect_errors=True)
         self.assertEqual(response.status_code, 404)
+
+    def test_version(self):
+        response = self.app.get('/stamboom/about')
+        self.assertEqual(response.status_code, 200)
