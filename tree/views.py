@@ -2,12 +2,12 @@
 Views for the tree app.
 
 """
-from django.http import Http404
+from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 
 from tree import models
-from tree.helpers import get_lineages
+from tree.helpers import get_lineages, get_version
 
 
 def tree(request, ancestor=None):
@@ -38,3 +38,8 @@ def tree(request, ancestor=None):
             'lineages': lineages
         }
     )
+
+
+def version(request):
+    content = 'Family Tree v. {}'.format(get_version())
+    return HttpResponse(content, content_type='text/plain')
