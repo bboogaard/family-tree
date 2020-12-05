@@ -135,8 +135,6 @@ class Ancestor(models.Model):
 
     date_of_death = models.DateField('Overlijdensdatum', null=True, blank=True)
 
-    details = models.TextField('Details', blank=True)
-
     father = models.ForeignKey(
         'self', related_name='children_of_father', on_delete=models.CASCADE,
         verbose_name='Vader', null=True, blank=True,
@@ -284,6 +282,40 @@ class Ancestor(models.Model):
             )
         except Lineage.DoesNotExist:
             pass
+
+
+class Bio(models.Model):
+    """Model for biographical info."""
+
+    ancestor = models.OneToOneField(
+        Ancestor,
+        related_name='bio',
+        on_delete=models.CASCADE,
+        verbose_name='Voorouder'
+    )
+
+    details = models.TextField('Details', blank=True)
+
+    def __str__(self):
+        return 'Bio {}'.format(str(self.ancestor))
+
+
+class BioLink(models.Model):
+    """Model for links to biographical info."""
+
+    bio = models.ForeignKey(
+        Bio,
+        related_name='links',
+        on_delete=models.CASCADE,
+        verbose_name='Bio'
+    )
+
+    link_text = models.CharField('Link text', max_length=100)
+
+    url = models.URLField('Url')
+
+    def __str__(self):
+        return self.link_text
 
 
 class Marriage(models.Model):
