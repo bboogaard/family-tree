@@ -1,8 +1,12 @@
 from django_webtest import WebTest
+from django.core.cache import cache
 from django.test import TestCase
 
 from lib.testing.mixins import AssertsMixin
 from tree.tests import factories
+
+
+missing = object()
 
 
 class TreeTestCase(AssertsMixin, TestCase):
@@ -56,6 +60,7 @@ class TreeTestCase(AssertsMixin, TestCase):
         super().setUp()
         if self.with_persistent_names:
             self._setup_names()
+        cache.clear()
 
     def _setup_names(self):
         self.top_male.refresh_from_db()
@@ -147,6 +152,30 @@ class TreeTestCase(AssertsMixin, TestCase):
         self.generation_extra[1].slug = ''
         self.generation_extra[1].full_clean()
         self.generation_extra[1].save()
+
+    @staticmethod
+    def assertCacheContains(key):
+        try:
+            assert cache.get_entry(key, missing) is not missing, \
+                "Cache does not contain key {}".format(key)
+        except AttributeError:
+            pass
+
+    @staticmethod
+    def assertCacheNotContains(key):
+        try:
+            assert cache.get_entry(key, missing) is missing, \
+                "Cache unexpectedly contains key {}".format(key)
+        except AttributeError:
+            pass
+
+    @staticmethod
+    def assertCacheValueEquals(key, value):
+        try:
+            assert cache.get_entry(key, missing) == value, \
+                "Cache value does not equal {}".format(value)
+        except AttributeError:
+            pass
 
 
 class TreeViewTest(WebTest, TreeTestCase):

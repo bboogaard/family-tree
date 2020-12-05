@@ -138,7 +138,7 @@ class Ancestor(models.Model):
     details = models.TextField('Details', blank=True)
 
     father = models.ForeignKey(
-        'self', related_name='children_of_father', on_delete=models.PROTECT,
+        'self', related_name='children_of_father', on_delete=models.CASCADE,
         verbose_name='Vader', null=True, blank=True,
         limit_choices_to=models.Q(gender='m'))
 
@@ -158,7 +158,7 @@ class Ancestor(models.Model):
     middlename = models.CharField('Tussenvoegsel', max_length=100, blank=True)
 
     mother = models.ForeignKey(
-        'self', related_name='children_of_mother', on_delete=models.PROTECT,
+        'self', related_name='children_of_mother', on_delete=models.CASCADE,
         verbose_name='Moeder', null=True, blank=True,
         limit_choices_to=models.Q(gender='f'))
 
@@ -184,7 +184,7 @@ class Ancestor(models.Model):
         verbose_name_plural = 'Voorouders'
 
     def __str__(self):
-        return self.get_fullname()
+        return ' '.join(filter(None, [self.get_fullname(), self.get_age()]))
 
     def clean(self):
         if self.year_of_death:

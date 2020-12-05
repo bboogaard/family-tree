@@ -66,8 +66,7 @@ class TestAncestor(TreeTestCase):
         ancestor.save()
 
         result = str(ancestor)
-        expected = 'John Doe'
-        self.assertEqual(result, expected)
+        self.assertTrue(result.startswith('John Doe'))
 
     def test_clean_set_has_expired(self):
         ancestor = self.top_male

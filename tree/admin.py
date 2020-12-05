@@ -4,6 +4,8 @@ Django-admin integration for the tree app.
 """
 from django import forms
 from django.contrib import admin
+from django.core.cache import cache
+from django.core.cache.utils import make_template_fragment_key
 from nested_inline.admin import NestedStackedInline, NestedModelAdmin
 
 from tree import models
@@ -151,9 +153,26 @@ class AncestorAdmin(NestedModelAdmin):
 
     list_display = ['get_fullname', 'get_age', 'slug']
 
-    list_filter = [FatherFilter, MotherFilter]
+    list_filter = [FatherFilter, MotherFilter, 'lineage']
 
     form = AncestorForm
 
 
 admin.site.register(models.Ancestor, AncestorAdmin)
+
+
+class LineageAdmin(admin.ModelAdmin):
+
+    form = LineageForm
+
+    def clear_caches(self, request, queryset):
+        for lineage in queryset:
+            cache.delete('lineages-{}'.format(lineage.ancestor_id))
+            cache.delete(
+                make_template_fragment_key('tree', [lineage.ancestor_id])
+            )
+
+    actions = [clear_caches]
+
+
+admin.site.register(models.Lineage, LineageAdmin)
