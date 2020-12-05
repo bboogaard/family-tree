@@ -156,21 +156,24 @@ class TreeTestCase(AssertsMixin, TestCase):
     @staticmethod
     def assertCacheContains(key):
         try:
-            assert cache.get_entry(key, missing) is not missing, "Cache does not contain key {}".format(key)
+            assert cache.get_entry(key, missing) is not missing, \
+                "Cache does not contain key {}".format(key)
         except AttributeError:
             pass
 
     @staticmethod
     def assertCacheNotContains(key):
         try:
-            assert cache.get_entry(key, missing) is missing, "Cache unexpectedly contains key {}".format(key)
+            assert cache.get_entry(key, missing) is missing, \
+                "Cache unexpectedly contains key {}".format(key)
         except AttributeError:
             pass
 
     @staticmethod
     def assertCacheValueEquals(key, value):
         try:
-            assert cache.get_entry(key, missing) == value, "Cache value does not equal {}".format(value)
+            assert cache.get_entry(key, missing) == value, \
+                "Cache value does not equal {}".format(value)
         except AttributeError:
             pass
 
