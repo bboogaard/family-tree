@@ -296,8 +296,12 @@ class Bio(models.Model):
 
     details = models.TextField('Details', blank=True)
 
+    class Meta:
+        verbose_name = 'Persoonlijke gegevens'
+        verbose_name_plural = 'Persoonlijke gegevens'
+
     def __str__(self):
-        return 'Bio {}'.format(str(self.ancestor))
+        return 'Persoonlijke gegevens {}'.format(str(self.ancestor))
 
 
 class BioLink(models.Model):
@@ -313,6 +317,10 @@ class BioLink(models.Model):
     link_text = models.CharField('Link text', max_length=100)
 
     url = models.URLField('Url')
+
+    class Meta:
+        verbose_name = 'Link'
+        verbose_name_plural = 'Links'
 
     def __str__(self):
         return self.link_text
