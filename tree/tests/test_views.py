@@ -17,13 +17,13 @@ class TestTreeView(TreeViewTest):
         self.assertEqual(response.status_code, 200)
 
     def test_get_root_ancestor(self):
-        response = self.app.get('/stamboom/john-glass-1812-1874')
+        response = self.app.get('/stamboom/john-glass-1812-1874/')
         self.assertEqual(response.status_code, 301)
         self.assertEqual(response.location, '/stamboom/')
 
     def test_get_ancestor(self):
         response = self.app.get(
-            '/stamboom/priscilla-glass-1840-1910'
+            '/stamboom/priscilla-glass-1840-1910/'
         )
         self.assertEqual(response.status_code, 200)
 
@@ -36,7 +36,7 @@ class TestTreeView(TreeViewTest):
 
     def test_get_ancestor_not_found(self):
         response = self.app.get(
-            '/stamboom/priscilla-glass-1839-1910', expect_errors=True
+            '/stamboom/priscilla-glass-1839-1910/', expect_errors=True
         )
         self.assertEqual(response.status_code, 404)
 
@@ -52,7 +52,7 @@ class TestTreeView(TreeViewTest):
 
     def test_get_ancestor_no_lineage(self):
         response = self.app.get(
-            '/stamboom/martin-glass-1836-1901', expect_errors=True)
+            '/stamboom/martin-glass-1836-1901/', expect_errors=True)
         self.assertEqual(response.status_code, 404)
 
     def test_version(self):

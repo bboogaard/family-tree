@@ -122,7 +122,7 @@ class TestTreeTags(TreeTestCase):
         element = PyQuery(doc.find('.female'))
 
         result = element.attr('data-url')
-        expected = '/stamboom/priscilla-glass-1840-1910'
+        expected = '/stamboom/priscilla-glass-1840-1910/'
         self.assertEqual(result, expected)
 
         result = element.text()

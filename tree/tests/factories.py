@@ -24,8 +24,6 @@ class AncestorFactory(factory.django.DjangoModelFactory):
         date_end=datetime.date(2000, 12, 31)
     )
 
-    details = factory.Faker('text')
-
     firstname = factory.Faker('first_name')
 
     gender = factory.LazyAttribute(lambda obj: random.choice(['m', 'f']))
