@@ -122,6 +122,8 @@ def get_marriages(ancestor):
                 marriage.place_of_marriage
             ))
     return marriages
+
+
 def _get_parent(parent, visible_ancestors):
     if not parent:
         return None, False
