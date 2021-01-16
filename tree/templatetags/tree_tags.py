@@ -15,26 +15,10 @@ register = template.Library()
 
 @register.inclusion_tag('templatetags/tree.html', takes_context=True)
 def render_tree(context, ancestor):
-    marriages = []
-
-    if ancestor.gender == 'm':
-        for marriage in ancestor.marriages_of_husband.all():
-            children = (
-                ancestor.children_of_father
-                .filter(mother=marriage.wife)
-                .with_marriages()
-                .order_by_age()
-            )
-            marriages.append((ancestor, marriage.wife, children))
-    elif ancestor.gender == 'f':
-        for marriage in ancestor.marriages_of_wife.all():
-            children = (
-                ancestor.children_of_mother
-                .filter(father=marriage.husband)
-                .with_marriages()
-                .order_by_age()
-            )
-            marriages.append((ancestor, marriage.husband, children))
+    marriages = [
+        (marriage.ancestor, marriage.spouse, marriage.children)
+        for marriage in helpers.get_marriages(ancestor)
+    ]
 
     flat_ancestors = context.get('flat_ancestors', [])
     flat_ancestors.extend(
