@@ -8,7 +8,10 @@ def make_cache_key(key, args=None, kwargs=None):
     if args:
         serialized.extend([_serialize(arg) for arg in args])
     if kwargs:
-        serialized.extend(['{}={}'.format(key, _serialize(val)) for key, val in sorted(kwargs.items(), key=operator.itemgetter(0))])
+        serialized.extend([
+            '{}={}'.format(key, _serialize(val))
+            for key, val in sorted(kwargs.items(), key=operator.itemgetter(0))
+        ])
     return ':'.join(serialized)
 
 

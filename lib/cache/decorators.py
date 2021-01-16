@@ -20,7 +20,8 @@ def cache_result(key, timeout=DEFAULT_TIMEOUT, backend='default'):
     return decorator
 
 
-def cache_method_result(key, key_attrs=None, timeout=DEFAULT_TIMEOUT, backend='default'):
+def cache_method_result(key, key_attrs=None, timeout=DEFAULT_TIMEOUT,
+                        backend='default'):
 
     def decorator(func):
 
@@ -30,10 +31,18 @@ def cache_method_result(key, key_attrs=None, timeout=DEFAULT_TIMEOUT, backend='d
             cache_key = make_cache_key(
                 key,
                 kwargs=dict(
-                    list(map(lambda attr: (attr, getattr(instance, attr)), key_attrs)) if key_attrs else []
+                    list(
+                        map(
+                            lambda attr: (attr, getattr(instance, attr)),
+                            key_attrs
+                        )
+                    )
+                    if key_attrs else []
                 )
             )
-            return _get_func_result(cache_key, timeout, cache, func, args, kwargs, instance)
+            return _get_func_result(
+                cache_key, timeout, cache, func, args, kwargs, instance
+            )
 
         return wrapped_func
 

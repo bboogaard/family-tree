@@ -157,7 +157,8 @@ class TestTreeTags(TreeTestCase):
             details='1: Foo\n2: Bar',
             ancestor=self.top_male
         )
-        output = self.render('{% render_bio ancestor %}', ancestor=self.top_male)
+        output = self.render(
+            '{% render_bio ancestor %}', ancestor=self.top_male)
 
         doc = PyQuery(output)
         lst = PyQuery(doc.find('dd'))

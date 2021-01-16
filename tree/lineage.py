@@ -43,7 +43,8 @@ class Lineages(object):
             self._objects = self._get_objects()
         return self._objects
 
-    @cache_method_result('lineage-objects', key_attrs=['ancestor'], timeout=None)
+    @cache_method_result('lineage-objects', key_attrs=['ancestor'],
+                         timeout=None)
     def _get_objects(self):
         objects = list(
             models.Lineage.objects

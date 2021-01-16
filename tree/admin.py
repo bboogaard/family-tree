@@ -162,7 +162,9 @@ class MotherFilter(AncestorFilter):
 
 class AncestorAdmin(NestedModelAdmin):
 
-    inlines = [MarriageOfHusbandInLine, MarriageOfWifeInLine, LineageInLine, BioInLine]
+    inlines = [
+        MarriageOfHusbandInLine, MarriageOfWifeInLine, LineageInLine, BioInLine
+    ]
 
     list_display = ['get_fullname', 'get_age', 'slug']
 

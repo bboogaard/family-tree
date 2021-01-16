@@ -29,7 +29,8 @@ class TestHelpers(TreeTestCase):
         self.assertIn(self.generation_1[0], lineage)
 
         self.assertCacheContains('lineages:{}'.format(self.top_male.pk))
-        self.assertCacheContains('lineage-objects:ancestor={}'.format(self.top_male.pk))
+        self.assertCacheContains('lineage-objects:ancestor={}'.format(
+            self.top_male.pk))
 
     def test_get_parents(self):
         parents = helpers.get_parents(
