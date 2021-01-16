@@ -91,3 +91,33 @@ div[data-url] {
     color: #666;
     border: 1px solid rgb(100,100,100);
 }
+
+dl.bio {
+    margin-left: 10px;
+    display: flex;
+    flex-wrap: wrap;
+}
+dl.bio dt {
+    width: 20%;
+    margin-bottom: 15px;
+}
+dl.bio dd {
+    margin-left: auto;
+    width: 80%;
+    margin-bottom: 15px;
+}
+
+ul.marriage {
+    margin-left: 10px;
+    padding-left: 0px;
+    list-style-type: none;
+}
+
+ul.marriage li {
+    list-style-type: none;
+    margin-bottom: 15px;
+}
+
+ul.marriage li .marriage-line {
+    margin-bottom: 15px;
+}
