@@ -151,3 +151,14 @@ class TestTreeTags(TreeTestCase):
             lineages=self.lineages
         )
         self.assertEqual(output, '')
+
+    def test_render_bio(self):
+        factories.BioFactory(
+            details='1: Foo\n2: Bar',
+            ancestor=self.top_male
+        )
+        output = self.render('{% render_bio ancestor %}', ancestor=self.top_male)
+
+        doc = PyQuery(output)
+        lst = PyQuery(doc.find('dd'))
+        self.assertEqual(len(lst), 5)

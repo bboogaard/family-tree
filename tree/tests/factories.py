@@ -68,3 +68,17 @@ class LineageFactory(factory.django.DjangoModelFactory):
     ancestor = factory.SubFactory(AncestorFactory, gender='m')
 
     descendant = factory.SubFactory(AncestorFactory)
+
+
+class BioFactory(factory.django.DjangoModelFactory):
+
+    class Meta:
+        model = models.Bio
+
+    @factory.post_generation
+    def links(self, create, extracted, **kwargs):
+        if not create or not extracted:
+            return
+
+        for url, link_text in extracted:
+            self.links.create(url=url, link_text=link_text)
