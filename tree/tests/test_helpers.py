@@ -10,12 +10,26 @@ class TestHelpers(TreeTestCase):
         lineage = models.Lineage.objects.select_related(
             'ancestor', 'descendant'
         ).get(pk=self.lineage.pk)
-        with self.assertNumQueries(2):
-            result = helpers.build_lineage(lineage)
+        result = helpers.build_lineage(lineage)
         expected = [
             (self.generation_1[0], 1)
         ]
         self.assertEqual(result, expected)
+
+        self.assertCacheValueEquals(
+            'lineage:{}'.format(self.lineage.pk),
+            [
+                (self.generation_1[0], 1)
+            ]
+        )
+
+    def test_get_lineages(self):
+        lineages = helpers.get_lineages(self.top_male)
+        lineage = lineages[self.top_male.pk]
+        self.assertIn(self.generation_1[0], lineage)
+
+        self.assertCacheContains('lineages:{}'.format(self.top_male.pk))
+        self.assertCacheContains('lineage-objects:ancestor={}'.format(self.top_male.pk))
 
     def test_get_parents(self):
         parents = helpers.get_parents(

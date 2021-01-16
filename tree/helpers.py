@@ -9,6 +9,7 @@ from typing import List, Optional
 from django.urls import reverse
 from django.utils.html import format_html
 
+from lib.cache.decorators import cache_result
 from tree.models import Ancestor
 from tree.lineage import Lineages
 
@@ -18,7 +19,6 @@ class LineageBuilder(object):
     def __init__(self):
         self._descendant = None
         self._generations = []
-        self._cache = {}
 
     def build(self, lineage):
         self._generations = []
@@ -53,19 +53,17 @@ class LineageBuilder(object):
         else:
             self._descendant = descendant
 
-    def _get_children(self, ancestor):
-        children = self._cache.get(ancestor.pk)
-        if not children:
-            children = list(ancestor.children.order_by_age())
-            self._cache[ancestor.pk] = children
-
-        return children
+    @staticmethod
+    def _get_children(ancestor):
+        return list(ancestor.children.order_by_age())
 
 
+@cache_result('lineage', timeout=None)
 def build_lineage(lineage):
     return LineageBuilder().build(lineage)
 
 
+@cache_result('lineages', timeout=None)
 def get_lineages(ancestor):
     return Lineages(ancestor)
 
