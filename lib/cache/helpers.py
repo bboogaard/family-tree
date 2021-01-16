@@ -3,7 +3,7 @@ import operator
 from lib.cache.serializers import CacheKeySerializerFactory
 
 
-def make_cache_key(key, args, kwargs):
+def make_cache_key(key, args=None, kwargs=None):
     serialized = [key]
     if args:
         serialized.extend([_serialize(arg) for arg in args])

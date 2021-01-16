@@ -12,6 +12,8 @@ def test_func(arg1, arg2):
 
 class TestClass:
 
+    foo = 'bar'
+
     @cache_method_result('test-method-result')
     def test_func(self, arg1, arg2):
         return arg1 + arg2
@@ -19,6 +21,10 @@ class TestClass:
     @cache_method_result('test-object-result')
     def test_func_with_model_instance(self, arg1):
         return str(arg1)
+
+    @cache_method_result('test-method-result-attrs', key_attrs=['foo'])
+    def test_func_with_attrs(self, arg1, arg2):
+        return arg1 + arg2
 
 
 class TestDecorators(SimpleTestCase):
@@ -39,6 +45,16 @@ class TestDecorators(SimpleTestCase):
         self.assertEqual(result, expected)
 
         result = cache.get_entry('test-method-result:1:1')
+        expected = 2
+        self.assertEqual(result, expected)
+
+    def test_cache_method_result_with_attr(self):
+        obj = TestClass()
+        result = obj.test_func_with_attrs(1, 1)
+        expected = 2
+        self.assertEqual(result, expected)
+
+        result = cache.get_entry('test-method-result-attrs:foo=bar:1:1')
         expected = 2
         self.assertEqual(result, expected)
 
