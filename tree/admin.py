@@ -183,7 +183,8 @@ class LineageAdmin(admin.ModelAdmin):
     def clear_caches(self, request, queryset):
         for lineage in queryset:
             cache.delete('lineages:{}'.format(lineage.ancestor_id))
-            cache.delete('lineage-objects:ancestor={}'.format(lineage.ancestor_id))
+            cache.delete('lineage-objects:ancestor={}'.format(
+                lineage.ancestor_id))
             cache.delete(
                 make_template_fragment_key('tree', [lineage.ancestor_id])
             )

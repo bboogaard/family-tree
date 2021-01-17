@@ -64,7 +64,8 @@ class TestTreeView(TreeViewTest):
                 ('/path/to/link/2', 'Link text 2')
             ]
         )
-        response = self.app.get('/stamboom/john-glass-1812-1874/persoonlijke-gegevens')
+        response = self.app.get(
+            '/stamboom/john-glass-1812-1874/persoonlijke-gegevens')
         self.assertEqual(response.status_code, 200)
         response.mustcontain(
             '<dd>1: Foo</dd>',
