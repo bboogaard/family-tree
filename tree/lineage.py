@@ -2,8 +2,7 @@
 Contains a wrapper to hold lineage data.
 
 """
-from django.core.cache import cache
-
+from lib.cache.decorators import cache_method_result
 from tree import models
 
 
@@ -23,7 +22,6 @@ class Lineages(object):
 
     def __init__(self, ancestor):
         self.ancestor = ancestor
-        self.cache_key = 'lineages-{}'.format(self.ancestor.pk)
         self._objects = None
 
     def __getitem__(self, item):
@@ -42,16 +40,11 @@ class Lineages(object):
     @property
     def objects(self):
         if self._objects is None:
-            self._objects = self._maybe_get_from_cache()
+            self._objects = self._get_objects()
         return self._objects
 
-    def _maybe_get_from_cache(self):
-        objects = cache.get(self.cache_key)
-        if objects is None:
-            objects = self._get_objects()
-            cache.set(self.cache_key, objects)
-        return objects
-
+    @cache_method_result('lineage-objects', key_attrs=['ancestor'],
+                         timeout=None)
     def _get_objects(self):
         objects = list(
             models.Lineage.objects

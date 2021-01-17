@@ -18,13 +18,15 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path, re_path
 
-from tree.views import tree, version
+from tree.views import bio, tree, version
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     re_path(r'^stamboom/$', tree, name='tree'),
     re_path(r'^stamboom/about', version, name='about'),
-    re_path(r'^stamboom/(?P<ancestor>[^/]+)$', tree, name='ancestor_tree'),
+    re_path(r'^stamboom/(?P<ancestor>[^/]+)/$', tree, name='ancestor_tree'),
+    re_path(r'^stamboom/(?P<ancestor>[^/]+)/persoonlijke-gegevens$', bio,
+            name='ancestor_bio'),
 ]
 
 if settings.DEBUG:

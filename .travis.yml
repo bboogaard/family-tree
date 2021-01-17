@@ -5,7 +5,7 @@ addons:
 env:
 - DATABASE_URL=postgresql://postgres:@127.0.0.1/family_tree
 python:
-- '3.6'
+- '3.8.5'
 services:
 - redis
 before_script:
