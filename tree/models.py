@@ -283,6 +283,16 @@ class Ancestor(models.Model):
         except Lineage.DoesNotExist:
             pass
 
+    def get_bio(self):
+        try:
+            return (
+                Bio.objects
+                .select_related('ancestor')
+                .get(ancestor=self)
+            )
+        except Bio.DoesNotExist:
+            pass
+
 
 class Bio(models.Model):
     """Model for biographical info."""

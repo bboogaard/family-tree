@@ -1,0 +1,63 @@
+{% load cache %}
+{% load static %}
+{% load tree_tags %}
+
+
+<html>
+<head >
+<META HTTP-EQUIV="Pragma" CONTENT="no-cache">
+<META HTTP-EQUIV="Expires" CONTENT="-1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<title>Persoonlijke gegevens van {{ bio.ancestor }}</title>
+<link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
+
+</head>
+<body>
+    {% ancestor_url bio.ancestor as anc_url %}
+    <h1>Persoonlijke gegevens van {% if anc_url %}<a href="{{ anc_url }}">{% endif %}{{ bio.ancestor }}{% if anc_url %}</a>{% endif %}</h1>
+    {% render_bio bio.ancestor %}
+
+    {% if marriages %}
+        <ul class="bio">
+            <li><strong>Huwelijken</strong></li>
+        {% for marriage in marriages %}
+            <li>
+                {% ancestor_url marriage.spouse as spouse_url %}
+                <div class="bio-line">Getrouwd met <strong>{% if spouse_url %}<a href="{{ spouse_url }}">{% endif %}{{ marriage.spouse }}{% if spouse_url %}</a>{% endif %}</strong>{% if marriage.place_of_marriage %} te {{ marriage.place_of_marriage }}{% endif %}{% if marriage.date_of_marriage %} op {{ marriage.date_of_marriage|date:'j F Y' }}{% endif %}</div>
+            {% if marriage.children %}
+                <ul>
+                    <li><strong>Kinderen</strong></li>
+                {% for child in marriage.children %}
+                    <li>
+                    {% ancestor_url child as child_url %}
+                    {% if child_url %}
+                        <a href="{{ child_url }}">
+                            {{ child }}
+                        </a>
+                    {% else %}
+                        {{ child }}
+                    {% endif %}
+                    </li>
+                {%  endfor %}
+                </ul>
+            {% endif %}
+            </li>
+        {% endfor %}
+        </ul>
+    {% endif %}
+
+    {% with bio.links.all as links %}
+        {% if links %}
+            <ul class="bio">
+                <li><strong>Links</strong></li>
+            {% for link in links %}
+                <li>
+                    <a href="{{ link.url }}" target="_blank">{{ link.link_text }}</a>
+                </li>
+            {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+
+</body>
+</html>

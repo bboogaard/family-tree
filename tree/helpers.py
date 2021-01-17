@@ -58,7 +58,6 @@ class LineageBuilder(object):
         return list(ancestor.children.order_by_age())
 
 
-@cache_result('lineage', timeout=None)
 def build_lineage(lineage):
     return LineageBuilder().build(lineage)
 
@@ -122,6 +121,20 @@ def get_marriages(ancestor):
                 marriage.place_of_marriage
             ))
     return marriages
+
+
+@cache_result('ancestor_url', timeout=None)
+def ancestor_url(ancestor, is_root_ancestor=False):
+    if not is_root_ancestor and ancestor.get_lineage():
+        return reverse('ancestor_tree', kwargs={
+            'ancestor': ancestor.slug
+        })
+    elif ancestor.get_bio():
+        return reverse('ancestor_bio', kwargs={
+            'ancestor': ancestor.slug
+        })
+
+    return ''
 
 
 def _get_parent(parent, visible_ancestors):

@@ -107,17 +107,17 @@ dl.bio dd {
     margin-bottom: 15px;
 }
 
-ul.marriage {
+ul.bio {
     margin-left: 10px;
     padding-left: 0px;
     list-style-type: none;
 }
 
-ul.marriage li {
+ul.bio li {
     list-style-type: none;
     margin-bottom: 15px;
 }
 
-ul.marriage li .marriage-line {
+ul.bio li .bio-line {
     margin-bottom: 15px;
 }
