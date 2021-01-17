@@ -97,6 +97,19 @@ class LineageInLine(NestedStackedInline):
     inlines = [GenerationInLine]
 
 
+admin.site.register(models.BioLink)
+
+
+class BioInLine(NestedStackedInline):
+
+    extra = 0
+
+    model = models.Bio
+
+
+admin.site.register(models.Bio)
+
+
 class AncestorForm(forms.ModelForm):
 
     class Meta:
@@ -149,7 +162,9 @@ class MotherFilter(AncestorFilter):
 
 class AncestorAdmin(NestedModelAdmin):
 
-    inlines = [MarriageOfHusbandInLine, MarriageOfWifeInLine, LineageInLine]
+    inlines = [
+        MarriageOfHusbandInLine, MarriageOfWifeInLine, LineageInLine, BioInLine
+    ]
 
     list_display = ['get_fullname', 'get_age', 'slug']
 
@@ -167,7 +182,9 @@ class LineageAdmin(admin.ModelAdmin):
 
     def clear_caches(self, request, queryset):
         for lineage in queryset:
-            cache.delete('lineages-{}'.format(lineage.ancestor_id))
+            cache.delete('lineages:{}'.format(lineage.ancestor_id))
+            cache.delete('lineage-objects:ancestor={}'.format(
+                lineage.ancestor_id))
             cache.delete(
                 make_template_fragment_key('tree', [lineage.ancestor_id])
             )

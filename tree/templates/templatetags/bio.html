@@ -1,0 +1,27 @@
+<dl class="bio">
+    {% if ancestor.birthdate %}
+    <dt>Geboortedatum</dt>
+    <dd>{{ ancestor.birthdate|date:'j F Y' }}</dd>
+    {% endif %}
+
+    {% if ancestor.place_of_birth %}
+    <dt>Geboorteplaats</dt>
+    <dd>{{ ancestor.place_of_birth }}</dd>
+    {% endif %}
+
+    {% if ancestor.date_of_death %}
+    <dt>Datum van overlijden</dt>
+    <dd>{{ ancestor.date_of_death|date:'j F Y' }}</dd>
+    {% endif %}
+
+    {% if ancestor.place_of_death %}
+    <dt>Plaats van overlijden</dt>
+    <dd>{{ ancestor.place_of_death }}</dd>
+    {% endif %}
+
+    {% for line in lines %}
+    {% if line.0 %}<dt>{{ line.0 }}</dt>{% endif %}
+    <dd>{{ line.1 }}</dd>
+    {% endfor %}
+</dl>
+
