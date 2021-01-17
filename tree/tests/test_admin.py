@@ -28,7 +28,10 @@ class TestLineageAdmin(TreeTestCase):
 
     def test_clear_caches(self):
         cache.add('lineages:{}'.format(self.lineage.ancestor_id), 'foo')
-        cache.add('lineage-objects:ancestor={}'.format(self.lineage.ancestor_id), 'foo')
+        cache.add(
+            'lineage-objects:ancestor={}'.format(self.lineage.ancestor_id),
+            'foo'
+        )
         cache.add(
             make_template_fragment_key('tree', [self.lineage.ancestor_id]), ''
         )
