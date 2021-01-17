@@ -27,14 +27,18 @@ class TestLineageAdmin(TreeTestCase):
         self.site = AdminSite()
 
     def test_clear_caches(self):
-        cache.add('lineages-{}'.format(self.lineage.ancestor_id), 'foo')
+        cache.add('lineages:{}'.format(self.lineage.ancestor_id), 'foo')
+        cache.add('lineage-objects:ancestor={}'.format(self.lineage.ancestor_id), 'foo')
         cache.add(
             make_template_fragment_key('tree', [self.lineage.ancestor_id]), ''
         )
         ma = LineageAdmin(Lineage, self.site)
         ma.clear_caches(request, Lineage.objects.filter(pk=self.lineage.pk))
         self.assertCacheNotContains(
-            'lineages-{}'.format(self.lineage.ancestor_id)
+            'lineages:{}'.format(self.lineage.ancestor_id)
+        )
+        self.assertCacheNotContains(
+            'lineage-objects:ancestor={}'.format(self.lineage.ancestor_id)
         )
         self.assertCacheNotContains(
             make_template_fragment_key('tree', [self.lineage.ancestor_id])

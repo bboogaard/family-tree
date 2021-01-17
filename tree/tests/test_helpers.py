@@ -16,13 +16,6 @@ class TestHelpers(TreeTestCase):
         ]
         self.assertEqual(result, expected)
 
-        self.assertCacheValueEquals(
-            'lineage:{}'.format(self.lineage.pk),
-            [
-                (self.generation_1[0], 1)
-            ]
-        )
-
     def test_get_lineages(self):
         lineages = helpers.get_lineages(self.top_male)
         lineage = lineages[self.top_male.pk]
