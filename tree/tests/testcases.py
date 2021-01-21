@@ -15,38 +15,50 @@ class TreeTestCase(AssertsMixin, TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        cls.top_male = factories.AncestorFactory(gender='m', is_root=True)
-        cls.top_female = factories.AncestorFactory(gender='f')
+        cls.top_male = factories.AncestorFactory(
+            gender='m', is_root=True, firstname='John'
+        )
+        cls.top_female = factories.AncestorFactory(
+            gender='f', firstname='Jane'
+        )
         cls.generation_1 = [
             factories.AncestorFactory(
-                gender='m', father=cls.top_male, mother=cls.top_female
+                gender='m', father=cls.top_male, mother=cls.top_female,
+                firstname='Martin'
             ),
             factories.AncestorFactory(
-                gender='f', father=cls.top_male, mother=cls.top_female
+                gender='f', father=cls.top_male, mother=cls.top_female,
+                firstname='Priscilla'
             )
         ]
         factories.MarriageFactory(husband=cls.top_male, wife=cls.top_female)
 
-        cls.spouse_1 = factories.AncestorFactory(gender='f')
+        cls.spouse_1 = factories.AncestorFactory(
+            gender='f', firstname='Sylvia'
+        )
         cls.generation_2 = [
             factories.AncestorFactory(
-                gender='m', father=cls.generation_1[0], mother=cls.spouse_1
+                gender='m', father=cls.generation_1[0], mother=cls.spouse_1,
+                firstname='Johnny'
             ),
             factories.AncestorFactory(
-                gender='f', father=cls.generation_1[0], mother=cls.spouse_1
+                gender='f', father=cls.generation_1[0], mother=cls.spouse_1,
+                firstname='Sylvia'
             )
         ]
         factories.MarriageFactory(
             husband=cls.generation_1[0], wife=cls.spouse_1
         )
 
-        cls.spouse_2 = factories.AncestorFactory(gender='m')
+        cls.spouse_2 = factories.AncestorFactory(gender='m', firstname='Donald')
         cls.generation_extra = [
             factories.AncestorFactory(
-                gender='m', mother=cls.generation_1[1], father=cls.spouse_2
+                gender='m', mother=cls.generation_1[1], father=cls.spouse_2,
+                firstname='Donald'
             ),
             factories.AncestorFactory(
-                gender='f', mother=cls.generation_1[1], father=cls.spouse_2
+                gender='f', mother=cls.generation_1[1], father=cls.spouse_2,
+                firstname='Minny'
             )
         ]
         factories.MarriageFactory(
@@ -64,7 +76,6 @@ class TreeTestCase(AssertsMixin, TestCase):
 
     def _setup_names(self):
         self.top_male.refresh_from_db()
-        self.top_male.firstname = 'John'
         self.top_male.lastname = 'Glass'
         self.top_male.birthyear = 1812
         self.top_male.year_of_death = 1874
@@ -73,7 +84,6 @@ class TreeTestCase(AssertsMixin, TestCase):
         self.top_male.save()
 
         self.top_female.refresh_from_db()
-        self.top_female.firstname = 'Jane'
         self.top_female.lastname = 'Snyder'
         self.top_female.birthyear = 1824
         self.top_female.year_of_death = 1890
@@ -82,7 +92,6 @@ class TreeTestCase(AssertsMixin, TestCase):
         self.top_female.save()
 
         self.generation_1[0].refresh_from_db()
-        self.generation_1[0].firstname = 'Martin'
         self.generation_1[0].lastname = 'Glass'
         self.generation_1[0].birthyear = 1836
         self.generation_1[0].year_of_death = 1901
@@ -91,7 +100,6 @@ class TreeTestCase(AssertsMixin, TestCase):
         self.generation_1[0].save()
 
         self.generation_1[1].refresh_from_db()
-        self.generation_1[1].firstname = 'Priscilla'
         self.generation_1[1].lastname = 'Glass'
         self.generation_1[1].birthyear = 1840
         self.generation_1[1].year_of_death = 1910
@@ -100,7 +108,6 @@ class TreeTestCase(AssertsMixin, TestCase):
         self.generation_1[1].save()
 
         self.spouse_1.refresh_from_db()
-        self.spouse_1.firstname = 'Sylvia'
         self.spouse_1.lastname = 'Reed'
         self.spouse_1.birthyear = 1851
         self.spouse_1.year_of_death = 1920
@@ -109,7 +116,6 @@ class TreeTestCase(AssertsMixin, TestCase):
         self.spouse_1.save()
 
         self.spouse_2.refresh_from_db()
-        self.spouse_2.firstname = 'Donald'
         self.spouse_2.lastname = 'Friend'
         self.spouse_2.birthyear = 1860
         self.spouse_2.year_of_death = 1934
@@ -118,7 +124,6 @@ class TreeTestCase(AssertsMixin, TestCase):
         self.spouse_2.save()
 
         self.generation_2[0].refresh_from_db()
-        self.generation_2[0].firstname = 'Johnny'
         self.generation_2[0].lastname = 'Glass'
         self.generation_2[0].birthyear = 1871
         self.generation_2[0].year_of_death = 1952
@@ -127,7 +132,6 @@ class TreeTestCase(AssertsMixin, TestCase):
         self.generation_2[0].save()
 
         self.generation_2[1].refresh_from_db()
-        self.generation_2[1].firstname = 'Sylvia'
         self.generation_2[1].lastname = 'Glass'
         self.generation_2[1].birthyear = 1873
         self.generation_2[1].year_of_death = 1960
@@ -136,7 +140,6 @@ class TreeTestCase(AssertsMixin, TestCase):
         self.generation_2[1].save()
 
         self.generation_extra[0].refresh_from_db()
-        self.generation_extra[0].firstname = 'Minny'
         self.generation_extra[0].lastname = 'Friend'
         self.generation_extra[0].birthyear = 1888
         self.generation_extra[0].year_of_death = 1953
@@ -145,7 +148,6 @@ class TreeTestCase(AssertsMixin, TestCase):
         self.generation_extra[0].save()
 
         self.generation_extra[1].refresh_from_db()
-        self.generation_extra[1].firstname = 'Donald'
         self.generation_extra[1].lastname = 'Friend'
         self.generation_extra[1].birthyear = 1890
         self.generation_extra[1].year_of_death = 1961

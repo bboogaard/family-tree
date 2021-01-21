@@ -193,3 +193,13 @@ class LineageAdmin(admin.ModelAdmin):
 
 
 admin.site.register(models.Lineage, LineageAdmin)
+
+
+class ChristianNameAdmin(admin.ModelAdmin):
+
+    list_display = ['name']
+
+    readonly_fields = ['name']
+
+
+admin.site.register(models.ChristianName, ChristianNameAdmin)

@@ -124,6 +124,84 @@ class AncestorQuerySet(models.QuerySet):
         )
 
 
+class ChristianName(models.Model):
+    """Model for first (christian) names."""
+
+    alias_for = models.ForeignKey(
+        'self',
+        related_name='aliases',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
+    )
+
+    female_name = models.CharField(
+        'Meisjesnaam', max_length=100, null=True, blank=True
+    )
+
+    male_name = models.CharField(
+        'Jongensnaam', max_length=100, null=True, blank=True
+    )
+
+    name = models.CharField('Naam', max_length=201, blank=True)
+
+    name_type = models.CharField('Soort naam', max_length=1, choices=[
+        ('b', 'Jongens- en meisjesnaam'),
+        ('f', 'Meisjesnaam'),
+        ('m', 'Jongensnaam'),
+    ])
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['name_type', 'female_name', 'male_name'],
+                name="Unique constraint for boy's and girl's name",
+                condition=models.Q(
+                    name_type='b',
+                    female_name__isnull=False,
+                    male_name__isnull=False
+                )
+            ),
+            models.UniqueConstraint(
+                fields=['name_type', 'female_name', 'male_name'],
+                name="Unique constraint for girl's name",
+                condition=models.Q(
+                    name_type='f',
+                    female_name__isnull=False,
+                    male_name__isnull=True
+                )
+            ),
+            models.UniqueConstraint(
+                fields=['name_type', 'female_name', 'male_name'],
+                name="Unique constraint for boy's name",
+                condition=models.Q(
+                    name_type='m',
+                    female_name__isnull=True,
+                    male_name__isnull=False
+                )
+            )
+        ]
+        ordering = ['name']
+        verbose_name = 'Doopnaam'
+        verbose_name_plural = 'Doopnamen'
+
+    def __str__(self):
+        return self.name
+
+    def clean(self):
+        self.name = '/'.join(filter(None, [self.male_name, self.female_name]))
+
+    def get_gender_name(self, gender):
+        if gender == 'f':
+            result = self.female_name
+        elif gender == 'm':
+            result = self.male_name
+        else:
+            result = None
+
+        return result if result is not None else ''
+
+
 class Ancestor(models.Model):
     """Model for the ancestor data."""
 
@@ -133,14 +211,21 @@ class Ancestor(models.Model):
 
     birthplace = models.CharField('Geboorteplaats', max_length=100, blank=True)
 
+    christian_name = models.ForeignKey(
+        ChristianName,
+        related_name='ancestors',
+        on_delete=models.PROTECT,
+        verbose_name='Doopnaam',
+        null=True,
+        blank=True
+    )
+
     date_of_death = models.DateField('Overlijdensdatum', null=True, blank=True)
 
     father = models.ForeignKey(
         'self', related_name='children_of_father', on_delete=models.CASCADE,
         verbose_name='Vader', null=True, blank=True,
         limit_choices_to=models.Q(gender='m'))
-
-    firstname = models.CharField('Voornaam', max_length=100, blank=True)
 
     gender = models.CharField(max_length=1, choices=[
         ('m', 'Man'),
@@ -213,13 +298,20 @@ class Ancestor(models.Model):
     def natural_key(self):
         return (self.slug, )
 
+    @property
+    def firstname(self):
+        if not self.christian_name:
+            return ''
+
+        return self.christian_name.get_gender_name(self.gender)
+
     def get_fullname(self):
         parts = filter(None, [
             self.firstname,
             self.middlename,
             self.lastname
         ])
-        return ' '.join(parts)
+        return ' '.join(map(str, parts))
     get_fullname.short_description = 'Naam'
 
     def get_age(self, placeholder='????'):
