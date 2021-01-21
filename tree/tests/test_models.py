@@ -53,6 +53,27 @@ class TestAncestorQuerySet(TreeTestCase):
         children[1].refresh_from_db()
 
 
+class TestChristianName(TreeTestCase):
+
+    def test_set_name(self):
+        christian_name = models.ChristianName(
+            name_type='b',
+            female_name='Harriet',
+            male_name='Harry'
+        )
+        christian_name.full_clean()
+        self.assertEqual(str(christian_name), 'Harry/Harriet')
+
+    def test_get_gender_name(self):
+        christian_name = models.ChristianName(
+            name_type='b',
+            female_name='Harriet',
+            male_name='Harry'
+        )
+        self.assertEqual(christian_name.get_gender_name('f'), 'Harriet')
+        self.assertEqual(christian_name.get_gender_name('m'), 'Harry')
+
+
 class TestAncestor(TreeTestCase):
 
     def setUp(self):
