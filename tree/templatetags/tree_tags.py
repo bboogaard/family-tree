@@ -82,5 +82,5 @@ def render_bio(ancestor):
 
 
 @register.simple_tag()
-def ancestor_url(ancestor, is_root_ancestor=False):
-    return helpers.ancestor_url(ancestor, is_root_ancestor)
+def ancestor_url(ancestor):
+    return helpers.ancestor_url(ancestor)

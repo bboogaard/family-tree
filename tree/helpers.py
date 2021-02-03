@@ -10,6 +10,7 @@ from django.urls import reverse
 from django.utils.html import format_html
 
 from lib.cache.decorators import cache_result
+from services.lineage.service import LineageService
 from tree.models import Ancestor
 from tree.lineage import Lineages
 
@@ -124,17 +125,23 @@ def get_marriages(ancestor):
 
 
 @cache_result('ancestor_url', timeout=None)
-def ancestor_url(ancestor, is_root_ancestor=False):
-    if not is_root_ancestor and ancestor.get_lineage():
-        return reverse('ancestor_tree', kwargs={
-            'ancestor': ancestor.slug
-        })
-    elif ancestor.get_bio():
-        return reverse('ancestor_bio', kwargs={
-            'ancestor': ancestor.slug
-        })
-
-    return ''
+def ancestor_url(ancestor, root_only=False):
+    lineage_service = LineageService()
+    if not root_only:
+        if root_ancestor := lineage_service.find_root(ancestor):
+            return reverse(
+                'ancestor_tree',
+                kwargs={
+                    'ancestor': root_ancestor.slug
+                }
+            )
+    elif lineage_service.has_lineage(ancestor):
+        return reverse(
+            'ancestor_tree',
+            kwargs={
+                'ancestor': ancestor.slug
+            }
+        )
 
 
 def _get_parent(parent, visible_ancestors):
