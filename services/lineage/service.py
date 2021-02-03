@@ -31,22 +31,25 @@ class LineageService(ABC):
             )
         )
 
-    def find_nearest(self, ancestor: Ancestor, check_spouses: bool = True) -> Ancestor:
+    def find_root(self, ancestor: Ancestor, check_spouses: bool = True) -> Ancestor:
         if lineage := self._find_lineage(ancestor):
             return lineage.generations[0]
 
         if check_spouses and ancestor.was_married:
             for marriage in ancestor.marriages.all():
-                if result := self.find_nearest(ancestor.get_spouse(marriage), False):
+                if result := self.find_root(ancestor.get_spouse(marriage), False):
                     return result
 
         if father := ancestor.father:
-            if result := self.find_nearest(father):
+            if result := self.find_root(father):
                 return result
 
         if mother := ancestor.mother:
-            if result := self.find_nearest(mother):
+            if result := self.find_root(mother):
                 return result
+
+    def has_lineage(self, ancestor: Ancestor) -> bool:
+        return bool(next(filter(lambda a: a == ancestor, map(lambda l: l[0], self.lineages)), None))
 
     def _find_lineage(self, ancestor: Ancestor) -> Lineage:
         lineages = []
@@ -55,6 +58,3 @@ class LineageService(ABC):
                 lineages.append((lineage, lineage.generations.index(ancestor)))
         lineages = list(sorted(lineages, key=operator.itemgetter(1)))
         return lineages[0][0] if lineages else None
-
-
-lineage_service = LineageService()

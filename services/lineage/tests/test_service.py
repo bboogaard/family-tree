@@ -1,44 +1,48 @@
-from services.lineage.service import lineage_service
+from services.lineage.service import LineageService
 from tree.tests.factories import AncestorFactory, LineageFactory, MarriageFactory
 from tree.tests.testcases import TreeTestCase
 
 
 class TestLineageService(TreeTestCase):
 
-    def test_find_nearest_for_lineage(self):
-        result = lineage_service.find_nearest(self.top_male)
+    def setUp(self):
+        super().setUp()
+        self.service = LineageService()
+
+    def test_find_root_for_lineage(self):
+        result = self.service.find_root(self.top_male)
         expected = self.top_male
         self.assertEqual(result, expected)
 
-    def test_find_nearest_for_spouse(self):
-        result = lineage_service.find_nearest(self.spouse_1)
+    def test_find_root_for_spouse(self):
+        result = self.service.find_root(self.spouse_1)
         expected = self.top_male
         self.assertEqual(result, expected)
 
-    def test_find_nearest_in_lineage(self):
-        result = lineage_service.find_nearest(self.generation_1[0])
+    def test_find_root_in_lineage(self):
+        result = self.service.find_root(self.generation_1[0])
         expected = self.top_male
         self.assertEqual(result, expected)
 
-    def test_find_nearest_for_father(self):
+    def test_find_root_for_father(self):
         ancestor = AncestorFactory(
             gender='f', mother=None, father=self.generation_1[0],
             firstname='Mary'
         )
-        result = lineage_service.find_nearest(ancestor)
+        result = self.service.find_root(ancestor)
         expected = self.top_male
         self.assertEqual(result, expected)
 
-    def test_find_nearest_for_mother(self):
+    def test_find_root_for_mother(self):
         ancestor = AncestorFactory(
             gender='f', mother=self.generation_1[1], father=None,
             firstname='Mary'
         )
-        result = lineage_service.find_nearest(ancestor)
+        result = self.service.find_root(ancestor)
         expected = self.top_male
         self.assertEqual(result, expected)
 
-    def test_find_nearest_multiple_lineages(self):
+    def test_find_root_multiple_lineages(self):
         spouse = AncestorFactory(gender='f')
         generation_3 = [
             AncestorFactory(
@@ -77,6 +81,6 @@ class TestLineageService(TreeTestCase):
             ancestor=self.generation_1[0],
             descendant=generation_5[0]
         )
-        result = lineage_service.find_nearest(generation_3[0])
+        result = self.service.find_root(generation_3[0])
         expected = self.generation_1[0]
         self.assertEqual(result, expected)
