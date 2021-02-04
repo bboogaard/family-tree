@@ -60,9 +60,14 @@ def render_ancestor(context, ancestor, css_class=None):
 
 @register.inclusion_tag('templatetags/bio.html')
 def render_bio(ancestor):
-    bio = ancestor.bio
-
+    bio = ancestor.get_bio()
     lines = []
+
+    if not bio:
+        return {
+            'ancestor': ancestor,
+            'lines': lines
+        }
 
     for line in map(lambda ln: ln.strip(), bio.details.split('\n')):
         if not line:

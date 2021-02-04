@@ -13,9 +13,9 @@
 
 </head>
 <body>
-    {% ancestor_url bio.ancestor as anc_url %}
-    <h1>Persoonlijke gegevens van {% if anc_url %}<a href="{{ anc_url }}">{% endif %}{{ bio.ancestor }}{% if anc_url %}</a>{% endif %}</h1>
-    {% render_bio bio.ancestor %}
+    {% ancestor_url ancestor as anc_url %}
+    <h1>Persoonlijke gegevens van {% if anc_url %}<a href="{{ anc_url }}">{% endif %}{{ ancestor }}{% if anc_url %}</a>{% endif %}</h1>
+    {% render_bio ancestor %}
 
     {% if marriages %}
         <ul class="bio">
@@ -46,18 +46,20 @@
         </ul>
     {% endif %}
 
-    {% with bio.links.all as links %}
-        {% if links %}
-            <ul class="bio">
-                <li><strong>Links</strong></li>
-            {% for link in links %}
-                <li>
-                    <a href="{{ link.url }}" target="_blank">{{ link.link_text }}</a>
-                </li>
-            {% endfor %}
-            </ul>
-        {% endif %}
-    {% endwith %}
+    {% if bio %}
+        {% with bio.links.all as links %}
+            {% if links %}
+                <ul class="bio">
+                    <li><strong>Links</strong></li>
+                {% for link in links %}
+                    <li>
+                        <a href="{{ link.url }}" target="_blank">{{ link.link_text }}</a>
+                    </li>
+                {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
+    {% endif %}
 
 </body>
 </html>
