@@ -20,10 +20,13 @@ class TestSearchService(TreeTestCase):
         with self.assertNumQueries(4):
             result = list(search_service.search('Johnny', settings.SEARCH_ORDER_BY_SCORE))
         expected = [
-            self.top_male, self.generation_2[0]
+            self.generation_2[0], self.top_male
         ]
         self.assertEqual(result, expected)
 
     def test_search_by_no_valid_order_by(self):
-        with self.assertRaises(ValueError):
-            search_service.search('Johnny', 'foo')
+        result = list(search_service.search('Johnny', 'foo'))
+        expected = [
+            self.top_male, self.generation_2[0]
+        ]
+        self.assertEqual(result, expected)

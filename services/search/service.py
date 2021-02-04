@@ -12,8 +12,7 @@ class SearchService(ABC):
 
     def search(self, search_query: str, order_by: str = settings.SEARCH_ORDER_BY_AGE) -> QuerySet:
         choices = [key for key, val in settings.SEARCH_ORDER_BY]
-        if order_by not in choices:
-            raise ValueError("{} is not a valid order by value".format(order_by))
+        order_by = order_by if order_by in choices else settings.SEARCH_ORDER_BY_AGE
 
         self._update(search_query)
         queryset = (
