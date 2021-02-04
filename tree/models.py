@@ -64,7 +64,7 @@ class AncestorQuerySet(models.QuerySet):
 
         return queryset
 
-    def order_by_age(self):
+    def with_age(self):
         queryset = self._clone()
 
         return (
@@ -120,8 +120,11 @@ class AncestorQuerySet(models.QuerySet):
                     output_field=CharField()
                 )
             )
-            .order_by('age')
         )
+
+    def order_by_age(self):
+        queryset = self._clone()
+        return queryset.with_age().order_by('age')
 
 
 class ChristianName(models.Model):
@@ -200,6 +203,28 @@ class ChristianName(models.Model):
             result = None
 
         return result if result is not None else ''
+
+
+class NameNGram(models.Model):
+    """NGram search cache for christian names."""
+
+    search_query = models.CharField('Zoektekst', max_length=100)
+
+    score = models.PositiveIntegerField('Score')
+
+    christian_name = models.ForeignKey(
+        ChristianName,
+        on_delete=models.CASCADE,
+        related_name='ngrams',
+        verbose_name='Doopnaam'
+    )
+
+    class Meta:
+        ordering = ['-score']
+        unique_together = ['search_query', 'christian_name']
+
+    def __str__(self):
+        return self.search_query
 
 
 class Ancestor(models.Model):
