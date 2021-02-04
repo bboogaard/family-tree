@@ -13,12 +13,14 @@ class SearchFilter(BaseSearchFilter):
     def get_search_query(self, request):
         search_param = self.search_param
         search_query = request.query_params.get(search_param, '')
-        search_query = search_query.replace('\x00', '')  # strip null characters
+        search_query = search_query.replace('\x00', '')
+        # strip null characters
         return search_query
 
     def get_order_by(self, request):
         ordering_param = self.ordering_param
-        order_by = request.query_params.get(ordering_param, settings.SEARCH_ORDER_BY_AGE)
+        order_by = request.query_params.get(
+            ordering_param, settings.SEARCH_ORDER_BY_AGE)
         return order_by
 
     def filter_queryset(self, request, queryset, view):

@@ -1,5 +1,6 @@
 from services.lineage.service import LineageService
-from tree.tests.factories import AncestorFactory, LineageFactory, MarriageFactory
+from tree.tests.factories import AncestorFactory, LineageFactory, \
+    MarriageFactory
 from tree.tests.testcases import TreeTestCase
 
 

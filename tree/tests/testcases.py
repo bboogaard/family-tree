@@ -50,7 +50,8 @@ class TreeTestCase(AssertsMixin, TestCase):
             husband=cls.generation_1[0], wife=cls.spouse_1
         )
 
-        cls.spouse_2 = factories.AncestorFactory(gender='m', firstname='Donald')
+        cls.spouse_2 = factories.AncestorFactory(
+            gender='m', firstname='Donald')
         cls.generation_extra = [
             factories.AncestorFactory(
                 gender='m', mother=cls.generation_1[1], father=cls.spouse_2,
