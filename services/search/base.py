@@ -12,13 +12,16 @@ class SearchService(ABC):
 
     def search(self, search_query: str, order_by: str = '') -> QuerySet:
         if self.default_order_by is None:
-            raise ImproperlyConfigured("{} expects a 'default_order_by' attribute".format(
-                self.__class__
-            ))
+            raise ImproperlyConfigured(
+                "{} expects a 'default_order_by' attribute".format(
+                    self.__class__
+                )
+            )
         if self.order_by_options is None:
-            raise ImproperlyConfigured("{} expects a 'order_by_options' attribute".format(
-                self.__class__
-            ))
+            raise ImproperlyConfigured(
+                "{} expects a 'order_by_options' attribute".format(
+                    self.__class__)
+            )
 
         choices = [key for key, val in self.order_by_options]
         order_by = order_by if order_by in choices else self.default_order_by

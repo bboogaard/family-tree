@@ -1,7 +1,8 @@
 from functools import partial
 from typing import List, Type
 
-from django.contrib.postgres.search import SearchQuery, SearchRank, SearchVector, SearchVectorField
+from django.contrib.postgres.search import SearchQuery, SearchRank, \
+    SearchVector, SearchVectorField
 from django.db.models import F, Model, OuterRef, QuerySet
 from django.db.models.signals import post_save
 
@@ -27,7 +28,8 @@ class SearchVectorHandler:
 
         instance = kwargs.get('instance')
         handler = kwargs.get('handler')
-        handler.model.objects.filter(pk=instance.pk).update(search_vector=SearchVector(*handler.search_fields))
+        handler.model.objects.filter(pk=instance.pk).update(
+            search_vector=SearchVector(*handler.search_fields))
 
     def update_all(self):
         for instance in self.model.objects.all():
@@ -42,14 +44,17 @@ class SearchVectorRegistry:
 
     def register(self, model: Type[Model], search_fields: List[str],
                  foreign_keys: List[str] = None):
-        self.handlers[model] = SearchVectorHandler(model, search_fields, foreign_keys)
+        self.handlers[model] = SearchVectorHandler(
+            model, search_fields, foreign_keys)
 
     def update(self):
         for model, handler in self.handlers.items():
-            print("Updating search vector field for {}".format(model._meta.verbose_name))
+            print("Updating search vector field for {}".format(
+                model._meta.verbose_name))
             handler.update_all()
 
-    def get_related_querysets(self, search_query: SearchQuery) -> List[QuerySet]:
+    def get_related_querysets(self, search_query: SearchQuery) -> \
+            List[QuerySet]:
         querysets = []
         for model, handler in self.handlers.items():
             if not handler.foreign_keys:
@@ -64,7 +69,8 @@ class SearchVectorRegistry:
                     .filter(
                         search_vector=search_query
                     )
-                    .annotate(rank=SearchRank(F('search_vector'), search_query))
+                    .annotate(
+                        rank=SearchRank(F('search_vector'), search_query))
                 )
         return querysets
 
@@ -81,5 +87,6 @@ def register_search_vector(model: Type[Model], search_fields: List[str],
     search_vector_registry.register(model, search_fields, foreign_keys)
 
 
-def get_search_vector_related_querysets(search_query: SearchQuery) -> List[QuerySet]:
+def get_search_vector_related_querysets(search_query: SearchQuery) -> \
+        List[QuerySet]:
     return search_vector_registry.get_related_querysets(search_query)
