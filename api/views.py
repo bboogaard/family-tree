@@ -2,14 +2,12 @@ from rest_framework.generics import GenericAPIView
 from rest_framework.renderers import BrowsableAPIRenderer, JSONRenderer
 from rest_framework.response import Response
 
-from api.filters import SearchFilter
+from api.filters import SearchNameFilter, SearchTextFilter
 from api.serializers import AncestorSerializer
 from tree.models import Ancestor
 
 
-class SearchNamesView(GenericAPIView):
-
-    filter_backends = [SearchFilter]
+class SearchView(GenericAPIView):
 
     queryset = Ancestor.objects.none()
 
@@ -26,3 +24,9 @@ class SearchNamesView(GenericAPIView):
         context = super().get_serializer_context()
         context['request'] = self.request
         return context
+
+
+class SearchNamesView(SearchView):
+
+    filter_backends = [SearchNameFilter]
+

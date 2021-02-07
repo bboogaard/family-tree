@@ -1,36 +1,37 @@
-from abc import ABC
-
 from django.conf import settings
-from django.db.models import OuterRef, Q, QuerySet, Subquery
+from django.db.models import Exists, OuterRef, Q, QuerySet, Subquery
 from django.db.models.functions import Greatest
 from ngram import NGram
 
+from services.search.base import SearchService
 from tree.models import Ancestor, ChristianName, NameNGram
 
 
-class SearchService(ABC):
+class SearchNameService(SearchService):
 
-    def search(self, search_query: str,
-               order_by: str = settings.SEARCH_ORDER_BY_AGE) -> QuerySet:
-        choices = [key for key, val in settings.SEARCH_ORDER_BY]
-        order_by = order_by if order_by in choices else \
-            settings.SEARCH_ORDER_BY_AGE
+    default_order_by = settings.SEARCH_ORDER_BY_AGE
 
+    order_by_options = settings.SEARCH_NAME_ORDER_BY
+
+    def get_queryset(self, search_query: str, order_by: str = '') -> QuerySet:
         self._update(search_query)
         min_score = settings.NAME_NGRAM_MIN_SCORE
         queryset = (
             Ancestor.objects
             .select_related('christian_name')
-            .filter(
-                Q(
-                    christian_name__ngrams__search_query__iexact=search_query,
-                    christian_name__ngrams__score__gte=min_score
-                ) | Q(
-                    christian_name__alias_for__ngrams__search_query__iexact=(
-                        search_query),
-                    christian_name__alias_for__ngrams__score__gte=min_score
+            .filter(Exists(
+                ChristianName.objects.filter(
+                    Q(
+                        pk=OuterRef('christian_name')
+                    ) | Q(
+                        alias_for=OuterRef('christian_name')
+                    ) | Q(
+                        aliases=OuterRef('christian_name')
+                    ),
+                    ngrams__search_query__iexact=search_query,
+                    ngrams__score__gte=min_score
                 )
-            )
+            ))
             .annotate(
                 name_score=Subquery(
                     NameNGram.objects.filter(
@@ -80,6 +81,3 @@ class SearchService(ABC):
                 christian_name=name
             ))
         NameNGram.objects.bulk_create(name_ngrams)
-
-
-search_service = SearchService()

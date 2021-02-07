@@ -162,4 +162,4 @@ class TestTreeTags(TreeTestCase):
 
         doc = PyQuery(output)
         lst = PyQuery(doc.find('dd'))
-        self.assertEqual(len(lst), 5)
+        self.assertEqual(len(lst), 6)
