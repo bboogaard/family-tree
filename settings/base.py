@@ -155,9 +155,14 @@ NAME_NGRAM_MIN_SCORE = 30
 
 SEARCH_ORDER_BY_AGE = 'age'
 SEARCH_ORDER_BY_SCORE = '-score'
+SEARCH_ORDER_BY_RANK = '-rank'
 
 SEARCH_NAME_ORDER_BY = (
     (SEARCH_ORDER_BY_AGE, 'Oldest'),
     (SEARCH_ORDER_BY_SCORE, 'Most similar'),
 )
 
+SEARCH_TEXT_ORDER_BY = (
+    (SEARCH_ORDER_BY_AGE, 'Oldest'),
+    (SEARCH_ORDER_BY_RANK, 'Most relevant'),
+)

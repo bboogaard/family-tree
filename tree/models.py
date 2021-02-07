@@ -2,12 +2,23 @@
 Models for the tree app.
 
 """
+from django.contrib.postgres.search import SearchVectorField
 from django.db import models, transaction
 from django.db.models import CharField, Exists, OuterRef, Prefetch, Q, \
     Value as V, When
 from django.db.models.functions import Cast, Concat
 from django.db.models.signals import post_save
 from django.utils.text import slugify
+
+from lib.search.search_vectors import register_search_vector
+
+
+class SearchVectorModel(models.Model):
+
+    search_vector = SearchVectorField('Search vector', null=True, blank=True)
+
+    class Meta:
+        abstract = True
 
 
 class AncestorQuerySet(models.QuerySet):
@@ -127,7 +138,7 @@ class AncestorQuerySet(models.QuerySet):
         return queryset.with_age().order_by('age')
 
 
-class ChristianName(models.Model):
+class ChristianName(SearchVectorModel):
     """Model for first (christian) names."""
 
     alias_for = models.ForeignKey(
@@ -205,6 +216,9 @@ class ChristianName(models.Model):
         return result if result is not None else ''
 
 
+register_search_vector(ChristianName, ['name'], ['ancestors'])
+
+
 class NameNGram(models.Model):
     """NGram search cache for christian names."""
 
@@ -227,7 +241,7 @@ class NameNGram(models.Model):
         return self.search_query
 
 
-class Ancestor(models.Model):
+class Ancestor(SearchVectorModel):
     """Model for the ancestor data."""
 
     birthdate = models.DateField('Geboortedatum', null=True, blank=True)
@@ -411,7 +425,12 @@ class Ancestor(models.Model):
             pass
 
 
-class Bio(models.Model):
+register_search_vector(
+    Ancestor, ['middlename', 'lastname', 'birthplace', 'place_of_death']
+)
+
+
+class Bio(SearchVectorModel):
     """Model for biographical info."""
 
     ancestor = models.OneToOneField(
@@ -431,7 +450,10 @@ class Bio(models.Model):
         return 'Persoonlijke gegevens {}'.format(str(self.ancestor))
 
 
-class BioLink(models.Model):
+register_search_vector(Bio, ['details'], ['ancestor'])
+
+
+class BioLink(SearchVectorModel):
     """Model for links to biographical info."""
 
     bio = models.ForeignKey(
@@ -453,7 +475,10 @@ class BioLink(models.Model):
         return self.link_text
 
 
-class Marriage(models.Model):
+register_search_vector(BioLink, ['link_text', 'url'], ['bio__ancestor'])
+
+
+class Marriage(SearchVectorModel):
     """Model for the marriage data."""
 
     husband = models.ForeignKey(
@@ -487,6 +512,11 @@ class Marriage(models.Model):
 
     def __str__(self):
         return '{} x {}'.format(str(self.husband), str(self.wife))
+
+
+register_search_vector(
+    Marriage, ['place_of_marriage'], ['husband', 'wife']
+)
 
 
 class LineageQuerySet(models.QuerySet):
