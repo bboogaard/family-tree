@@ -82,7 +82,10 @@ def register_search_vector(model: Type[Model], search_fields: List[str],
                            foreign_keys: List[str] = None):
     field = model._meta.get_field('search_vector')
     if not field or not isinstance(field, SearchVectorField):
-        raise ValueError("{} has no search vector field named 'search_vector'")
+        raise ValueError(
+            "{} has no search vector field named 'search_vector'".format(
+                model.__class__
+            ))
 
     search_vector_registry.register(model, search_fields, foreign_keys)
 
@@ -90,3 +93,14 @@ def register_search_vector(model: Type[Model], search_fields: List[str],
 def get_search_vector_related_querysets(search_query: SearchQuery) -> \
         List[QuerySet]:
     return search_vector_registry.get_related_querysets(search_query)
+
+
+def get_search_vector_search_fields(model: Type[Model]) -> List[str]:
+    handler = search_vector_registry.handlers.get(model)
+    if not handler:
+        raise ValueError(
+            "{} has no search vector field named 'search_vector'".format(
+                model.__class__
+            ))
+
+    return handler.search_fields

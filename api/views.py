@@ -3,7 +3,7 @@ from rest_framework.renderers import BrowsableAPIRenderer, JSONRenderer
 from rest_framework.response import Response
 
 from api.filters import SearchNameFilter, SearchTextFilter
-from api.serializers import AncestorSerializer
+from api.serializers import AncestorSerializer, AncestorSearchTextSerializer
 from tree.models import Ancestor
 
 
@@ -30,3 +30,9 @@ class SearchNamesView(SearchView):
 
     filter_backends = [SearchNameFilter]
 
+
+class SearchTextView(SearchView):
+
+    filter_backends = [SearchTextFilter]
+
+    serializer_class = AncestorSearchTextSerializer

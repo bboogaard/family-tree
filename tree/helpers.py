@@ -2,6 +2,7 @@
 Helpers for the tree app.
 
 """
+import re
 from dataclasses import dataclass
 from datetime import date
 from typing import List, Optional
@@ -13,6 +14,9 @@ from lib.cache.decorators import cache_result
 from services.lineage.service import LineageService
 from tree.models import Ancestor
 from tree.lineage import Lineages
+
+
+re_bio_line = re.compile(r'^\*\s?([^:]+)\s?:\s(.*)$')
 
 
 class LineageBuilder(object):
@@ -142,6 +146,21 @@ def ancestor_url(ancestor, root_only=False):
                 'ancestor': ancestor.slug
             }
         )
+
+
+def get_bio_details(bio):
+    lines = []
+    for line in map(lambda ln: ln.strip(), bio.details.split('\n')):
+        if not line:
+            continue
+
+        match = re_bio_line.match(line)
+        if match is None:
+            lines.append(('', line))
+            continue
+
+        lines.append((match.group(1), match.group(2)))
+    return lines
 
 
 def _get_parent(parent, visible_ancestors):

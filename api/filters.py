@@ -5,6 +5,7 @@ from rest_framework.filters import SearchFilter as BaseSearchFilter
 from rest_framework.settings import api_settings
 
 from services.search.names.service import SearchNameService
+from services.search.text.service import SearchTextService
 
 
 class SearchFilter(BaseSearchFilter):
@@ -16,9 +17,11 @@ class SearchFilter(BaseSearchFilter):
     @cached_property
     def search_service(self):
         if self.search_service_class is None:
-            raise ImproperlyConfigured("{} expects a 'search_service_class' attribute".format(
-                self.__class__
-            ))
+            raise ImproperlyConfigured(
+                "{} expects a 'search_service_class' attribute".format(
+                    self.__class__
+                )
+            )
 
         return self.search_service_class()
 
@@ -61,3 +64,20 @@ class SearchFilter(BaseSearchFilter):
 class SearchNameFilter(SearchFilter):
 
     search_service_class = SearchNameService
+
+
+class SearchTextFilter(SearchFilter):
+
+    search_service_class = SearchTextService
+
+    def filter_queryset(self, request, queryset, view):
+        queryset = super().filter_queryset(request, queryset, view)
+        queryset = (
+            queryset
+            .prefetch_related(
+                'bio__links',
+                'marriages_of_husband',
+                'marriages_of_wife'
+            )
+        )
+        return queryset

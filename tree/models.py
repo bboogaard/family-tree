@@ -449,6 +449,15 @@ class Bio(SearchVectorModel):
     def __str__(self):
         return 'Persoonlijke gegevens {}'.format(str(self.ancestor))
 
+    @property
+    def rendered_details(self):
+        from .helpers import get_bio_details
+        details = get_bio_details(self)
+        return ', '.join(
+            [': '.join(detail)
+             if detail[0] else detail[1] for detail in details]
+        )
+
 
 register_search_vector(Bio, ['details'], ['ancestor'])
 
