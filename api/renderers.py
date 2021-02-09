@@ -13,7 +13,8 @@ class HighlightBrowsableAPIRenderer(BrowsableAPIRenderer):
 class HighlightJsonRenderer(JSONRenderer):
 
     def render(self, data, accepted_media_type=None, renderer_context=None):
-        data = self._apply_highlighting(data, renderer_context.get('search_query'))
+        data = self._apply_highlighting(
+            data, renderer_context.get('search_query'))
         return super().render(data, accepted_media_type, renderer_context)
 
     def _apply_highlighting(self, data, search_query):
