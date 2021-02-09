@@ -3,6 +3,7 @@ from rest_framework.renderers import BrowsableAPIRenderer, JSONRenderer
 from rest_framework.response import Response
 
 from api.filters import SearchNameFilter, SearchTextFilter
+from api.renderers import HighlightBrowsableAPIRenderer, HighlightJsonRenderer
 from api.serializers import AncestorSerializer, AncestorSearchTextSerializer
 from tree.models import Ancestor
 
@@ -35,4 +36,13 @@ class SearchTextView(SearchView):
 
     filter_backends = [SearchTextFilter]
 
+    renderer_classes = [HighlightBrowsableAPIRenderer, HighlightJsonRenderer]
+
     serializer_class = AncestorSearchTextSerializer
+
+    def get_renderer_context(self):
+        context = super().get_renderer_context()
+        context['search_query'] = self.filter_backends[0]().get_search_query(
+            self.request
+        )
+        return context
