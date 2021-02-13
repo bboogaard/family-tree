@@ -42,15 +42,14 @@ def tree(request, ancestor=None):
 
 
 def bio(request, ancestor):
-    bio_obj = get_object_or_404(
-        models.Bio.objects.select_related('ancestor'), ancestor__slug=ancestor
-    )
+    ancestor_obj = get_object_or_404(models.Ancestor, slug=ancestor)
     return render(
         request,
         'bio.html',
         {
-            'bio': bio_obj,
-            'marriages': get_marriages(bio_obj.ancestor)
+            'ancestor': ancestor_obj,
+            'bio': ancestor_obj.get_bio(),
+            'marriages': get_marriages(ancestor_obj)
         }
     )
 

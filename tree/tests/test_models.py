@@ -53,15 +53,38 @@ class TestAncestorQuerySet(TreeTestCase):
         children[1].refresh_from_db()
 
 
+class TestChristianName(TreeTestCase):
+
+    def test_set_name(self):
+        christian_name = models.ChristianName(
+            name_type='b',
+            female_name='Harriet',
+            male_name='Harry'
+        )
+        christian_name.full_clean()
+        self.assertEqual(str(christian_name), 'Harry/Harriet')
+
+    def test_get_gender_name(self):
+        christian_name = models.ChristianName(
+            name_type='b',
+            female_name='Harriet',
+            male_name='Harry'
+        )
+        self.assertEqual(christian_name.get_gender_name('f'), 'Harriet')
+        self.assertEqual(christian_name.get_gender_name('m'), 'Harry')
+
+
 class TestAncestor(TreeTestCase):
 
     def setUp(self):
         super().setUp()
         self.top_male.refresh_from_db()
+        self.top_male.christian_name.refresh_from_db()
 
     def test_str(self):
         ancestor = self.top_male
-        ancestor.firstname = 'John'
+        ancestor.christian_name.male_name = 'John'
+        ancestor.christian_name.save()
         ancestor.lastname = 'Doe'
         ancestor.save()
 
@@ -79,7 +102,8 @@ class TestAncestor(TreeTestCase):
 
     def test_clean_set_slug(self):
         ancestor = self.top_male
-        ancestor.firstname = 'John'
+        ancestor.christian_name.male_name = 'John'
+        ancestor.christian_name.save()
         ancestor.lastname = 'Doe'
         ancestor.birthyear = 1812
         ancestor.year_of_death = 1874
@@ -94,7 +118,8 @@ class TestAncestor(TreeTestCase):
         self.generation_1[0].save()
 
         ancestor = self.top_male
-        ancestor.firstname = 'John'
+        ancestor.christian_name.male_name = 'John'
+        ancestor.christian_name.save()
         ancestor.lastname = 'Doe'
         ancestor.birthyear = 1812
         ancestor.year_of_death = 1874
@@ -113,7 +138,8 @@ class TestAncestor(TreeTestCase):
         self.generation_1[0].save()
 
         ancestor = self.top_male
-        ancestor.firstname = 100 * 'a'
+        ancestor.christian_name.male_name = 100 * 'a'
+        ancestor.christian_name.save()
         ancestor.middlename = 100 * 'a'
         ancestor.lastname = 100 * 'a'
         ancestor.birthyear = 1812
@@ -136,7 +162,8 @@ class TestAncestor(TreeTestCase):
 
     def test_get_fullname(self):
         ancestor = self.top_male
-        ancestor.firstname = 'John'
+        ancestor.christian_name.male_name = 'John'
+        ancestor.christian_name.save()
         ancestor.lastname = 'Doe'
         ancestor.save()
 

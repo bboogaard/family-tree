@@ -37,3 +37,5 @@ pynacl==1.4.0
 GitPython==3.1.11
 gitdb==4.0.5
 smmap==3.0.4
+djangorestframework~=3.12.2
+ngram==3.3.2
