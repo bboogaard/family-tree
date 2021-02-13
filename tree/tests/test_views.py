@@ -56,6 +56,13 @@ class TestTreeView(TreeViewTest):
         self.assertEqual(response.status_code, 404)
 
     def test_get_bio(self):
+        response = self.app.get(
+            '/stamboom/john-glass-1812-1874/persoonlijke-gegevens',
+            expect_errors=True
+        )
+        self.assertEqual(response.status_code, 200)
+
+    def test_get_bio_with_bio(self):
         factories.BioFactory(
             details='1: Foo\n2: Bar',
             ancestor=self.top_male,
@@ -73,13 +80,6 @@ class TestTreeView(TreeViewTest):
             '<a href="/path/to/link/1" target="_blank">Link text 1</a>',
             '<a href="/path/to/link/2" target="_blank">Link text 2</a>'
         )
-
-    def test_get_bio_not_found(self):
-        response = self.app.get(
-            '/stamboom/john-glass-1812-1874/persoonlijke-gegevens',
-            expect_errors=True
-        )
-        self.assertEqual(response.status_code, 404)
 
     def test_version(self):
         response = self.app.get('/stamboom/about')

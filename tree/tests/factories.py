@@ -24,8 +24,6 @@ class AncestorFactory(factory.django.DjangoModelFactory):
         date_end=datetime.date(2000, 12, 31)
     )
 
-    firstname = factory.Faker('first_name')
-
     gender = factory.LazyAttribute(lambda obj: random.choice(['m', 'f']))
 
     has_expired = True
@@ -40,6 +38,41 @@ class AncestorFactory(factory.django.DjangoModelFactory):
 
     class Meta:
         model = models.Ancestor
+
+    @factory.post_generation
+    def firstname(self, create, extracted, **kwargs):
+        if not create:
+            return
+
+        if not extracted:
+            return
+
+        if self.gender == 'f':
+            try:
+                self.christian_name = models.ChristianName.objects.get(
+                    name_type='f',
+                    female_name=extracted
+                )
+            except models.ChristianName.DoesNotExist:
+                self.christian_name = models.ChristianName(
+                    name_type='f',
+                    female_name=extracted
+                )
+                self.christian_name.full_clean()
+                self.christian_name.save()
+        elif self.gender == 'm':
+            try:
+                self.christian_name = models.ChristianName.objects.get(
+                    name_type='m',
+                    male_name=extracted
+                )
+            except models.ChristianName.DoesNotExist:
+                self.christian_name = models.ChristianName(
+                    name_type='m',
+                    male_name=extracted
+                )
+                self.christian_name.full_clean()
+                self.christian_name.save()
 
 
 class MarriageFactory(factory.django.DjangoModelFactory):

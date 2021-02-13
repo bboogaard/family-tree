@@ -46,7 +46,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'nested_inline'
+    'nested_inline',
+    'rest_framework'
 ]
 
 PROJECT_APPS = [
@@ -70,7 +71,7 @@ ROOT_URLCONF = 'urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -141,3 +142,27 @@ STATICFILES_DIRS = [
 ]
 
 PRODUCTION_ENV = False
+
+REST_FRAMEWORK = {
+    # Use Django's standard `django.contrib.auth` permissions,
+    # or allow read-only access for unauthenticated users.
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
+    ]
+}
+
+NAME_NGRAM_MIN_SCORE = 30
+
+SEARCH_ORDER_BY_AGE = 'age'
+SEARCH_ORDER_BY_SCORE = '-score'
+SEARCH_ORDER_BY_RANK = '-rank'
+
+SEARCH_NAME_ORDER_BY = (
+    (SEARCH_ORDER_BY_AGE, 'Oldest'),
+    (SEARCH_ORDER_BY_SCORE, 'Most similar'),
+)
+
+SEARCH_TEXT_ORDER_BY = (
+    (SEARCH_ORDER_BY_AGE, 'Oldest'),
+    (SEARCH_ORDER_BY_RANK, 'Most relevant'),
+)

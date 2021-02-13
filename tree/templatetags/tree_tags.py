@@ -3,7 +3,6 @@ Tags for rendering the tree.
 
 """
 import itertools
-import re
 
 from django import template
 from django.template.loader import render_to_string
@@ -12,9 +11,6 @@ from tree import helpers
 
 
 register = template.Library()
-
-
-re_bio_line = re.compile(r'^\*\s?([^:]+)\s?:\s(.*)$')
 
 
 @register.inclusion_tag('templatetags/tree.html', takes_context=True)
@@ -60,20 +56,15 @@ def render_ancestor(context, ancestor, css_class=None):
 
 @register.inclusion_tag('templatetags/bio.html')
 def render_bio(ancestor):
-    bio = ancestor.bio
+    bio = ancestor.get_bio()
 
-    lines = []
+    if not bio:
+        return {
+            'ancestor': ancestor,
+            'lines': []
+        }
 
-    for line in map(lambda ln: ln.strip(), bio.details.split('\n')):
-        if not line:
-            continue
-
-        match = re_bio_line.match(line)
-        if match is None:
-            lines.append(('', line))
-            continue
-
-        lines.append((match.group(1), match.group(2)))
+    lines = helpers.get_bio_details(bio)
 
     return {
         'ancestor': ancestor,
@@ -82,5 +73,5 @@ def render_bio(ancestor):
 
 
 @register.simple_tag()
-def ancestor_url(ancestor, is_root_ancestor=False):
-    return helpers.ancestor_url(ancestor, is_root_ancestor)
+def ancestor_url(ancestor):
+    return helpers.ancestor_url(ancestor)
