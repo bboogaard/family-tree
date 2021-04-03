@@ -128,22 +128,14 @@ def get_marriages(ancestor):
     return marriages
 
 
-@cache_result('ancestor_url', timeout=None)
-def ancestor_url(ancestor, root_only=False):
+@cache_result('ancestor-url', timeout=None, default_if_none='')
+def ancestor_url(ancestor):
     lineage_service = LineageService()
-    if not root_only:
-        if root_ancestor := lineage_service.find_root(ancestor):
-            return reverse(
-                'ancestor_tree',
-                kwargs={
-                    'ancestor': root_ancestor.slug
-                }
-            )
-    elif lineage_service.has_lineage(ancestor):
+    if root_ancestor := lineage_service.find_root(ancestor):
         return reverse(
             'ancestor_tree',
             kwargs={
-                'ancestor': ancestor.slug
+                'ancestor': root_ancestor.slug
             }
         )
 

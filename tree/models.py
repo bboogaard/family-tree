@@ -345,7 +345,7 @@ class Ancestor(SearchVectorModel):
                     self.middlename,
                     self.lastname,
                     self.birthyear,
-                    self.date_of_death,
+                    self.year_of_death,
                     self.has_expired,
                     serial
                 )
