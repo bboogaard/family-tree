@@ -10,6 +10,7 @@ from django.db.models.functions import Cast, Concat
 from django.db.models.signals import post_save
 from django.utils.text import slugify
 
+from lib.cache.decorators import cache_method_result
 from lib.search.search_vectors import register_search_vector
 
 
@@ -37,12 +38,12 @@ class AncestorQuerySet(models.QuerySet):
 
         return queryset
 
-    def with_children(self):
+    def with_has_children(self):
         queryset = self._clone()
 
         queryset = (
-            queryset.filter(
-                Exists(
+            queryset.annotate(
+                has_children=Exists(
                     self.model.objects
                     .filter(
                         Q(father=OuterRef('pk')) | Q(mother=OuterRef('pk'))
@@ -52,6 +53,11 @@ class AncestorQuerySet(models.QuerySet):
         )
 
         return queryset
+
+    def with_children(self):
+        queryset = self._clone()
+
+        return queryset.with_has_children().filter(has_children=True)
 
     def with_marriages(self):
         queryset = self._clone()
@@ -138,6 +144,22 @@ class AncestorQuerySet(models.QuerySet):
         return queryset.with_age().order_by('age')
 
 
+class ChristianNameQuerySet(models.QuerySet):
+
+    def get_or_create_name(self, name, gender):
+        kwarg = 'female_name' if gender == 'f' else 'male_name'
+        christian_name = self.filter(**{
+            '{}__iexact'.format(kwarg): name
+        }).first()
+        if not christian_name:
+            christian_name = self.create(**{
+                kwarg: name,
+                'name': name,
+                'name_type': gender
+            })
+        return christian_name
+
+
 class ChristianName(SearchVectorModel):
     """Model for first (christian) names."""
 
@@ -164,6 +186,8 @@ class ChristianName(SearchVectorModel):
         ('f', 'Meisjesnaam'),
         ('m', 'Jongensnaam'),
     ])
+
+    objects = ChristianNameQuerySet.as_manager()
 
     class Meta:
         constraints = [
@@ -301,6 +325,7 @@ class Ancestor(SearchVectorModel):
                 condition=models.Q(is_root=True)
             )
         ]
+        indexes = [models.Index(fields=['middlename', 'lastname'])]
         ordering = ['birthdate']
         verbose_name = 'Voorouder'
         verbose_name_plural = 'Voorouders'
@@ -315,10 +340,15 @@ class Ancestor(SearchVectorModel):
         if not self.slug:
             serial = 0
             while True:
-                parts = [self.get_fullname(), self.get_age('xxxx')]
-                if serial:
-                    parts.append(str(serial))
-                slug = slugify(' '.join(parts))
+                slug = self.generate_slug(
+                    self.firstname,
+                    self.middlename,
+                    self.lastname,
+                    self.birthyear,
+                    self.date_of_death,
+                    self.has_expired,
+                    serial
+                )
                 if len(slug) > 255:
                     slug = '-'.join(filter(lambda s: s != '0', [
                         slug[:255 - (len(str(serial)) + 1 if serial else 0)],
@@ -337,37 +367,58 @@ class Ancestor(SearchVectorModel):
     def natural_key(self):
         return (self.slug, )
 
-    @property
-    def firstname(self):
+    @cache_method_result(key='ancestor-firstname', key_attrs=['pk'], timeout=24 * 60 * 60)
+    def _get_firstname(self):
         if not self.christian_name:
             return ''
 
         return self.christian_name.get_gender_name(self.gender)
 
+    firstname = property(_get_firstname)
+
     def get_fullname(self):
-        parts = filter(None, [
-            self.firstname,
-            self.middlename,
-            self.lastname
-        ])
-        return ' '.join(map(str, parts))
+        return self.generate_fullname(
+            self.firstname, self.middlename, self.lastname
+        )
     get_fullname.short_description = 'Naam'
 
+    @staticmethod
+    def generate_fullname(firstname, middlename, lastname):
+        parts = filter(None, [
+            firstname,
+            middlename,
+            lastname
+        ])
+        return ' '.join(map(str, parts))
+
     def get_age(self, placeholder='????'):
-        if self.birthyear and self.year_of_death:
-            parts = [
-                self.birthyear,
-                self.year_of_death
-            ]
-        elif self.birthyear:
-            parts = [self.birthyear, placeholder if self.has_expired else '']
-        elif self.year_of_death:
-            parts = [placeholder, self.year_of_death]
+        return self.generate_age(
+            self.birthyear, self.year_of_death, self.has_expired, placeholder
+        )
+    get_age.short_description = 'Geboorte/sterftejaar'
+
+    @staticmethod
+    def generate_age(birthyear, year_of_death, has_expired, placeholder='????'):
+        if birthyear and year_of_death:
+            parts = [birthyear, year_of_death]
+        elif birthyear:
+            parts = [birthyear, placeholder if has_expired else '']
+        elif year_of_death:
+            parts = [placeholder, year_of_death]
         else:
-            parts = [placeholder, placeholder if self.has_expired else '']
+            parts = [placeholder, placeholder if has_expired else '']
 
         return ' - '.join(map(str, parts)).rstrip()
-    get_age.short_description = 'Geboorte/sterftejaar'
+
+    @staticmethod
+    def generate_slug(firstname, middlename, lastname, birthyear, year_of_death, has_expired, serial = 0):
+        parts = [
+            Ancestor.generate_fullname(firstname, middlename, lastname),
+            Ancestor.generate_age(birthyear, year_of_death, has_expired, placeholder='xxxx'),
+        ]
+        if serial:
+            parts.append(str(serial))
+        return slugify(' '.join(parts))
 
     @property
     def was_married(self):
@@ -474,7 +525,7 @@ class BioLink(SearchVectorModel):
 
     link_text = models.CharField('Link text', max_length=100)
 
-    url = models.URLField('Url')
+    url = models.URLField('Url', unique=True)
 
     class Meta:
         verbose_name = 'Link'
