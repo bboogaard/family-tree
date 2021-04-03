@@ -5,6 +5,7 @@ from django.db.models.functions import Greatest
 
 from lib.search.search_vectors import get_search_vector_related_querysets
 from services.search.base import SearchService
+from services.search.models import SearchTextRequest
 from tree.models import Ancestor
 
 
@@ -14,8 +15,8 @@ class SearchTextService(SearchService):
 
     order_by_options = settings.SEARCH_TEXT_ORDER_BY
 
-    def get_queryset(self, search_query: str, order_by: str = '') -> QuerySet:
-        query = SearchQuery(search_query)
+    def get_queryset(self, search_request: SearchTextRequest, order_by: str) -> QuerySet:
+        query = SearchQuery(search_request.text)
         related_querysets = get_search_vector_related_querysets(query)
         query_clause = Q(search_vector=query)
         rank_clause = {'rank_1': SearchRank(F('search_vector'), query)}

@@ -1,5 +1,6 @@
 from django.conf import settings
 
+from services.search.models import SearchTextRequest
 from services.search.text.service import SearchTextService
 from tree.tests.testcases import TreeTestCase
 
@@ -21,7 +22,7 @@ class TestSearchService(TreeTestCase):
 
     def test_search(self):
         with self.assertNumQueries(1):
-            result = list(self.service.search('Newtown'))
+            result = list(self.service.search(SearchTextRequest(text='Newtown')))
         expected = [
             self.top_male, self.generation_1[0]
         ]
@@ -30,14 +31,14 @@ class TestSearchService(TreeTestCase):
     def test_search_by_score(self):
         with self.assertNumQueries(1):
             result = list(self.service.search(
-                'Newtown', settings.SEARCH_ORDER_BY_RANK))
+                SearchTextRequest(text='Newtown'), settings.SEARCH_ORDER_BY_RANK))
         expected = [
             self.generation_1[0], self.top_male
         ]
         self.assertEqual(result, expected)
 
     def test_search_by_no_valid_order_by(self):
-        result = list(self.service.search('Newtown', 'foo'))
+        result = list(self.service.search(SearchTextRequest(text='Newtown'), 'foo'))
         expected = [
             self.top_male, self.generation_1[0]
         ]
