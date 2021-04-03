@@ -6,14 +6,14 @@ from django.core.cache.backends.base import DEFAULT_TIMEOUT
 from lib.cache.helpers import make_cache_key
 
 
-def cache_result(key, timeout=DEFAULT_TIMEOUT, backend='default'):
+def cache_result(key, timeout=DEFAULT_TIMEOUT, backend='default', default_if_none=None):
 
     def decorator(func):
 
         @wraps(func)
         def wrapped_func(*args, **kwargs):
             cache = caches[backend]
-            return _get_func_result(key, timeout, cache, func, args, kwargs)
+            return _get_func_result(key, timeout, cache, default_if_none, func, args, kwargs)
 
         return wrapped_func
 
@@ -21,7 +21,7 @@ def cache_result(key, timeout=DEFAULT_TIMEOUT, backend='default'):
 
 
 def cache_method_result(key, key_attrs=None, timeout=DEFAULT_TIMEOUT,
-                        backend='default'):
+                        backend='default', default_if_none=None):
 
     def decorator(func):
 
@@ -41,7 +41,7 @@ def cache_method_result(key, key_attrs=None, timeout=DEFAULT_TIMEOUT,
                 )
             )
             return _get_func_result(
-                cache_key, timeout, cache, func, args, kwargs, instance
+                cache_key, timeout, cache, default_if_none, func, args, kwargs, instance
             )
 
         return wrapped_func
@@ -49,11 +49,11 @@ def cache_method_result(key, key_attrs=None, timeout=DEFAULT_TIMEOUT,
     return decorator
 
 
-def _get_func_result(key, timeout, cache, func, args, kwargs, instance=None):
+def _get_func_result(key, timeout, cache, default_if_none, func, args, kwargs, instance=None):
     cache_key = make_cache_key(key, args, kwargs)
     result = cache.get(cache_key)
     if result is None:
         f = partial(func, instance) if instance else func
         result = f(*args, **kwargs)
-        cache.set(cache_key, result, timeout=timeout)
+        cache.set(cache_key, result if result else default_if_none, timeout=timeout)
     return result
