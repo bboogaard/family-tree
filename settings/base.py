@@ -47,7 +47,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'nested_inline',
-    'rest_framework'
+    'rest_framework',
+    'rest_framework.authtoken',
+    'django_filters'
 ]
 
 PROJECT_APPS = [
@@ -166,6 +168,10 @@ SEARCH_NAME_ORDER_BY = (
 SEARCH_TEXT_ORDER_BY = (
     (SEARCH_ORDER_BY_AGE, 'Oldest'),
     (SEARCH_ORDER_BY_RANK, 'Most relevant'),
+)
+
+SEARCH_ANCESTOR_ORDER_BY = (
+    (SEARCH_ORDER_BY_AGE, 'Oldest'),
 )
 
 SCRAPE_DIRECTION_UP = 'up'

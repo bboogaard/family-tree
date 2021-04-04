@@ -10,7 +10,7 @@ class TestSearchNamesView(TreeViewTest):
         self.assertEqual(response.status_code, 200)
 
     def test_get_search(self):
-        response = self.app.get('/api/v1/search/names?search=Johnny')
+        response = self.app.get('/api/v1/search/names?name=Johnny')
         self.assertEqual(response.status_code, 200)
         response.mustcontain('John Glass', 'Johnny Glass')
 
@@ -34,6 +34,20 @@ class TestSearchTextView(TreeViewTest):
         self.assertEqual(response.status_code, 200)
 
     def test_get_search(self):
-        response = self.app.get('/api/v1/search/text?search=Newtown')
+        response = self.app.get('/api/v1/search/text?text=Newtown')
         self.assertEqual(response.status_code, 200)
         response.mustcontain('John Glass', 'Martin Glass')
+
+
+class TestSearchAncestorView(TreeViewTest):
+
+    with_persistent_names = True
+
+    def test_get(self):
+        response = self.app.get('/api/v1/search/ancestors')
+        self.assertEqual(response.status_code, 200)
+
+    def test_get_search(self):
+        response = self.app.get('/api/v1/search/ancestors?lastname=snyder')
+        self.assertEqual(response.status_code, 200)
+        response.mustcontain('Jane Snyder')

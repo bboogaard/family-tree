@@ -1,8 +1,8 @@
-from django.urls import re_path
+from rest_framework.routers import SimpleRouter
 
-from api.views import SearchNamesView, SearchTextView
+from .views.search import SearchViewSet
 
-urlpatterns = [
-    re_path(r'^search/names', SearchNamesView.as_view()),
-    re_path(r'^search/text', SearchTextView.as_view()),
-]
+
+router = SimpleRouter(trailing_slash=False)
+router.register('search', SearchViewSet, basename='search')
+urlpatterns = router.urls
