@@ -411,7 +411,7 @@ class Ancestor(SearchVectorModel):
         return ' - '.join(map(str, parts)).rstrip()
 
     @staticmethod
-    def generate_slug(firstname, middlename, lastname, birthyear, year_of_death, has_expired, serial = 0):
+    def generate_slug(firstname, middlename, lastname, birthyear, year_of_death, has_expired, serial=0):
         parts = [
             Ancestor.generate_fullname(firstname, middlename, lastname),
             Ancestor.generate_age(birthyear, year_of_death, has_expired, placeholder='xxxx'),

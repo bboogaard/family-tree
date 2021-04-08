@@ -33,4 +33,5 @@ class PageAdmin(admin.ModelAdmin):
         ))
     ancestor_url.short_description = 'Voorouder'
 
+
 admin.site.register(models.Page, PageAdmin)
