@@ -1,0 +1,46 @@
+{% extends 'rest_framework/base.html' %}
+
+{% load form_tags %}
+
+
+{% block style %}
+    {{ block.super }}
+    <style>
+    .descendant-form {
+        padding-left: 10px;
+    }
+    .descendant-form input {
+        width: auto;
+    }
+    </style>
+
+{% endblock %}
+
+
+{% block content %}
+
+    <h1>Ancestors of {{ descendant }}</h1>
+
+    <form class="form-horizontal descendant-form" method="post" action="{% url 'api:trees-create-tree' descendant.pk %}">
+        {% csrf_token %}
+        <input type="hidden" name="descendant_id" value="{{ descendant.id }}">
+        <div class="form-group{% if errors.ancestor_id %} has-error{% endif %}">
+            {% for ancestor in data %}
+            <div class="radio{% if ancestor.has_lineage %} disabled{% endif %}">
+              <label class="control-label">
+                <input type="radio" name="ancestor_id" value="{{ ancestor.id }}"{% if ancestor.has_lineage %} disabled{% endif %}>
+                {{ ancestor.ancestor }}
+              </label>
+            </div>
+            {% endfor %}
+            {% if errors.ancestor_id %}
+            <span class="help-block">{% render_field_errors errors.ancestor_id %}</span>
+            {% endif %}
+        </div>
+        <div class="form-actions">
+            <br>
+            <input type="submit" class="btn btn-primary pull-left" value="Create tree">
+        </div>
+    </form>
+
+{% endblock %}

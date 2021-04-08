@@ -5,7 +5,7 @@ from rest_framework.viewsets import GenericViewSet
 
 from api.filters import SearchAncestorFilter, SearchNameFilter, SearchTextFilter
 from api.renderers import HighlightBrowsableAPIRenderer, HighlightJsonRenderer
-from api.serializers import AncestorSerializer, AncestorSearchTextSerializer
+from api.serializers import AncestorSerializer, AncestorSearchAncestorSerializer, AncestorSearchTextSerializer
 from tree.models import Ancestor
 
 
@@ -44,6 +44,6 @@ class SearchViewSet(ListModelMixin, GenericViewSet):
 
     @action(methods=['get'], detail=False)
     def ancestors(self, request, *args, **kwargs):
-        self.serializer_class = AncestorSerializer
+        self.serializer_class = AncestorSearchAncestorSerializer
         self.filter_backends = [SearchAncestorFilter]
         return self.list(request, *args, **kwargs)

@@ -27,7 +27,7 @@ urlpatterns = [
     re_path(r'^stamboom/(?P<ancestor>[^/]+)/$', tree, name='ancestor_tree'),
     re_path(r'^stamboom/(?P<ancestor>[^/]+)/persoonlijke-gegevens$', bio,
             name='ancestor_bio'),
-    re_path(r'^api/v1/', include('api.urls')),
+    re_path(r'^api/v1/', include('api.urls', namespace='api')),
 
 ]
 

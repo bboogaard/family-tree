@@ -1,4 +1,5 @@
 from django_webtest import WebTest
+from django.contrib.auth.models import User
 from django.core.cache import cache
 from django.test import TestCase
 
@@ -182,4 +183,9 @@ class TreeTestCase(AssertsMixin, TestCase):
 
 
 class TreeViewTest(WebTest, TreeTestCase):
-    pass
+
+    def setUp(self):
+        super().setUp()
+        self.test_user = User.objects.create_user(
+            'test_user', 'test@localhost.tld', '123456'
+        )
