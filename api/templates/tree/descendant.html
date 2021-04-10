@@ -28,7 +28,7 @@
             {% for ancestor in data %}
             <div class="radio{% if ancestor.has_lineage %} disabled{% endif %}">
               <label class="control-label">
-                <input type="radio" name="ancestor_id" value="{{ ancestor.id }}"{% if ancestor.has_lineage %} disabled{% endif %}>
+                <input type="radio" name="ancestor_id" value="{{ ancestor.id }}"{% if ancestor.has_lineage %} disabled{% endif %} data-preview-url="{% url 'preview_tree' ancestor=ancestor.slug descendant=descendant.slug %}">
                 {{ ancestor.ancestor }}
               </label>
             </div>
@@ -37,10 +37,26 @@
             <span class="help-block">{% render_field_errors errors.ancestor_id %}</span>
             {% endif %}
         </div>
-        <div class="form-actions">
+        <div class="form-actions pull-left">
             <br>
-            <input type="submit" class="btn btn-primary pull-left" value="Create tree">
+            <input type="submit" class="btn btn-primary" value="Create tree">
+            &nbsp;&nbsp;
+            <a id="preview-btn" href="" class="btn btn-primary disabled" target="_blank">Preview tree</a>
         </div>
     </form>
 
+{% endblock %}
+
+{% block script %}
+    {{ block.super }}
+    <script type="text/javascript">
+        $(function() {
+            $('input[type="radio"]').click(function() {
+                $("#preview-btn").removeClass('disabled');
+            });
+            $("#preview-btn").click(function() {
+               $(this).attr('href', $('input[type="radio"]:checked').data('preview-url'));
+            });
+        });
+    </script>
 {% endblock %}

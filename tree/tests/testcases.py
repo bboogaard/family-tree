@@ -187,5 +187,6 @@ class TreeViewTest(WebTest, TreeTestCase):
     def setUp(self):
         super().setUp()
         self.test_user = User.objects.create_user(
-            'test_user', 'test@localhost.tld', '123456'
+            'test_user', 'test@localhost.tld', '123456',
+            is_staff=True
         )
