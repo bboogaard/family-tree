@@ -52,6 +52,8 @@ class MarriageOfHusbandInLine(NestedStackedInline):
 
     form = MarriageForm
 
+    raw_id_fields = ['wife']
+
 
 class MarriageOfWifeInLine(NestedStackedInline):
 
@@ -62,6 +64,8 @@ class MarriageOfWifeInLine(NestedStackedInline):
     fk_name = 'wife'
 
     form = MarriageForm
+
+    raw_id_fields = ['husband']
 
 
 class GenerationInLine(NestedStackedInline):
@@ -96,6 +100,8 @@ class LineageInLine(NestedStackedInline):
 
     inlines = [GenerationInLine]
 
+    raw_id_fields = ['descendant']
+
 
 admin.site.register(models.BioLink)
 
@@ -123,41 +129,33 @@ class AncestorForm(forms.ModelForm):
 
 class AncestorFilter(admin.SimpleListFilter):
 
+    title = 'Voorouder'
+
+    parameter_name = 'ancestor_id'
+
+    field_name = 'id'
+
     def lookups(self, request, model_admin):
-        return [
-            (obj.pk, obj.get_fullname() + ' ' + obj.get_age())
-            for obj in self.ancestor_queryset.all()
-        ]
+        value = self.value_as_list()
+        if value:
+            return [
+                (str(ancestor.pk), str(ancestor))
+                for ancestor in models.Ancestor.objects.filter(pk__in=value)
+            ]
+
+        return []
 
     def queryset(self, request, queryset):
-        if self.value():
+        value = self.value_as_list()
+        if value:
             return queryset.filter(**{
-                '{}__pk'.format(self.related_field): self.value()
+                '{}__in'.format(self.field_name): value
             })
 
         return queryset
 
-
-class FatherFilter(AncestorFilter):
-
-    ancestor_queryset = models.Ancestor.objects.filter(gender='m')
-
-    parameter_name = 'father'
-
-    related_field = 'father'
-
-    title = 'Vader'
-
-
-class MotherFilter(AncestorFilter):
-
-    ancestor_queryset = models.Ancestor.objects.filter(gender='f')
-
-    parameter_name = 'mother'
-
-    related_field = 'mother'
-
-    title = 'Moeder'
+    def value_as_list(self):
+        return self.value().split(',') if self.value() else []
 
 
 class AncestorAdmin(NestedModelAdmin):
@@ -168,9 +166,19 @@ class AncestorAdmin(NestedModelAdmin):
 
     list_display = ['get_fullname', 'get_age', 'slug']
 
-    list_filter = [FatherFilter, MotherFilter, 'lineage']
+    list_filter = [AncestorFilter, 'lineage']
 
     form = AncestorForm
+
+    raw_id_fields = ['father', 'mother', 'christian_name']
+
+    search_fields = ['christian_name__name', 'lastname', 'birthyear', 'year_of_death']
+
+    def clear_caches(self, request, queryset):
+        for ancestor in queryset:
+            cache.delete('ancestor-url:{}'.format(ancestor.pk))
+
+    actions = ['clear_caches']
 
 
 admin.site.register(models.Ancestor, AncestorAdmin)
@@ -189,7 +197,7 @@ class LineageAdmin(admin.ModelAdmin):
                 make_template_fragment_key('tree', [lineage.ancestor_id])
             )
 
-    actions = [clear_caches]
+    actions = ['clear_caches']
 
 
 admin.site.register(models.Lineage, LineageAdmin)

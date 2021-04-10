@@ -18,17 +18,17 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path, re_path
 
-from tree.views import bio, tree, version
+from tree.views import bio, TreeView, PreviewTreeView, version
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    re_path(r'^stamboom/$', tree, name='tree'),
+    re_path(r'^stamboom/$', TreeView.as_view(), name='tree'),
     re_path(r'^stamboom/about', version, name='about'),
-    re_path(r'^stamboom/(?P<ancestor>[^/]+)/$', tree, name='ancestor_tree'),
+    re_path(r'^stamboom/(?P<ancestor>[^/]+)/$', TreeView.as_view(), name='ancestor_tree'),
+    re_path(r'^stamboom/preview/(?P<ancestor>[^/]+)/(?P<descendant>[^/]+)$', PreviewTreeView.as_view(), name='preview_tree'),
     re_path(r'^stamboom/(?P<ancestor>[^/]+)/persoonlijke-gegevens$', bio,
             name='ancestor_bio'),
-    re_path(r'^api/v1/', include('api.urls')),
-
+    re_path(r'^api/v1/', include('api.urls', namespace='api')),
 ]
 
 if settings.DEBUG:

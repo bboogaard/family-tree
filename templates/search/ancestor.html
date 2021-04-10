@@ -1,0 +1,18 @@
+{% extends 'search/base.html' %}
+
+{% block search_fields %}
+    <label class="control-label" for="id_has_children">Has children:</label>
+    <select class="form-control" style="width: 350px" name="has_children" id="id_has_children">
+        <option value=""{% if search_values.has_children is None %} selected{% endif %}>Unknown</option>
+        <option value="true"{% if search_values.has_children %} selected{% endif %}>Yes</option>
+        <option value="false"{% if search_values.has_children is False %} selected{% endif %}>No</option>
+    </select>
+    <br>
+    <label class="control-label" for="id_lastname">Last name:</label>
+    <input type="text" class="form-control" name="lastname" id="id_lastname" value="{{ search_values.lastname }}">
+    <br>
+    <label class="control-label" for="id_birthyear_from">Birth year between:</label>
+    <input type="number" class="form-control" name="birthyear_from" id="id_birthyear_from" style="width: 200px" value="{{ search_values.birthyear_from|default:1900 }}">
+    <label class="control-label" for="id_birthyear_to">and:</label>
+    <input type="number" class="form-control" name="birthyear_to" id="id_birthyear_to" style="width: 200px" value="{{ search_values.birthyear_to|default:1950 }}">
+{% endblock %}

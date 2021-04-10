@@ -4,6 +4,7 @@ from django.db.models.functions import Greatest
 from ngram import NGram
 
 from services.search.base import SearchService
+from services.search.models import SearchNameRequest
 from tree.models import Ancestor, ChristianName, NameNGram
 
 
@@ -13,8 +14,8 @@ class SearchNameService(SearchService):
 
     order_by_options = settings.SEARCH_NAME_ORDER_BY
 
-    def get_queryset(self, search_query: str, order_by: str = '') -> QuerySet:
-        self._update(search_query)
+    def get_queryset(self, search_request: SearchNameRequest, order_by: str) -> QuerySet:
+        self._update(search_request)
         min_score = settings.NAME_NGRAM_MIN_SCORE
         queryset = (
             Ancestor.objects
@@ -28,7 +29,7 @@ class SearchNameService(SearchService):
                     ) | Q(
                         aliases=OuterRef('christian_name')
                     ),
-                    ngrams__search_query__iexact=search_query,
+                    ngrams__search_query__iexact=search_request.name,
                     ngrams__score__gte=min_score
                 )
             ))
@@ -36,7 +37,7 @@ class SearchNameService(SearchService):
                 name_score=Subquery(
                     NameNGram.objects.filter(
                         christian_name=OuterRef('christian_name'),
-                        search_query__iexact=search_query
+                        search_query__iexact=search_request.name
                     ).values('score')[:1]
                 )
             )
@@ -44,7 +45,7 @@ class SearchNameService(SearchService):
                 alias_score=Subquery(
                     NameNGram.objects.filter(
                         christian_name__alias_for=OuterRef('christian_name'),
-                        search_query__iexact=search_query
+                        search_query__iexact=search_request.name
                     ).values('score')[:1]
                 )
             )
@@ -57,11 +58,11 @@ class SearchNameService(SearchService):
         return queryset
 
     @staticmethod
-    def _update(search_query: str):
-        if NameNGram.objects.filter(search_query__iexact=search_query).count():
+    def _update(search_request: SearchNameRequest):
+        if NameNGram.objects.filter(search_query__iexact=search_request.name).count():
             return
 
-        search_query = search_query.lower()
+        search_query = search_request.name.lower()
         name_ngrams = []
         for name in ChristianName.objects.all():
             if name.female_name:

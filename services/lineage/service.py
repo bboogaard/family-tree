@@ -31,24 +31,14 @@ class LineageService(ABC):
             )
         )
 
-    def find_root(self, ancestor: Ancestor,
-                  check_spouses: bool = True) -> Ancestor:
-        if lineage := self._find_lineage(ancestor):
-            return lineage.generations[0]
-
-        if check_spouses and ancestor.was_married:
-            for marriage in ancestor.marriages.all():
-                if result := self.find_root(
-                        ancestor.get_spouse(marriage), False):
-                    return result
-
-        if father := ancestor.father:
-            if result := self.find_root(father):
-                return result
-
-        if mother := ancestor.mother:
-            if result := self.find_root(mother):
-                return result
+    def find_root(self, ancestor: Ancestor) -> Ancestor:
+        candidates = [ancestor] + [
+            ancestor.get_spouse(marriage)
+            for marriage in ancestor.marriages.all()
+        ] + list(filter(None, [ancestor.father, ancestor.mother]))
+        for candidate in candidates:
+            if lineage := self._find_lineage(candidate):
+                return lineage.generations[0]
 
     def has_lineage(self, ancestor: Ancestor) -> bool:
         return bool(

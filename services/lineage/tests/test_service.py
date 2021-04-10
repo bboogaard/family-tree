@@ -10,7 +10,7 @@ class TestLineageService(TreeTestCase):
         super().setUp()
         self.service = LineageService()
 
-    def test_find_root_for_lineage(self):
+    def test_find_root(self):
         result = self.service.find_root(self.top_male)
         expected = self.top_male
         self.assertEqual(result, expected)
@@ -20,26 +20,8 @@ class TestLineageService(TreeTestCase):
         expected = self.top_male
         self.assertEqual(result, expected)
 
-    def test_find_root_in_lineage(self):
-        result = self.service.find_root(self.generation_1[0])
-        expected = self.top_male
-        self.assertEqual(result, expected)
-
-    def test_find_root_for_father(self):
-        ancestor = AncestorFactory(
-            gender='f', mother=None, father=self.generation_1[0],
-            firstname='Mary'
-        )
-        result = self.service.find_root(ancestor)
-        expected = self.top_male
-        self.assertEqual(result, expected)
-
-    def test_find_root_for_mother(self):
-        ancestor = AncestorFactory(
-            gender='f', mother=self.generation_1[1], father=None,
-            firstname='Mary'
-        )
-        result = self.service.find_root(ancestor)
+    def test_find_root_for_parent(self):
+        result = self.service.find_root(self.generation_2[1])
         expected = self.top_male
         self.assertEqual(result, expected)
 

@@ -1,18 +1,16 @@
 {% load rest_framework %}
-{% load i18n %}
-<h2>{% trans "Search" %}</h2>
-<form class="form-inline">
-  <div class="form-group">
-    <div class="input-group">
-      <input type="text" class="form-control" style="width: 350px" name="{{ search_param }}" value="{{ search_query }}">
-      <span class="input-group-btn">
+
+
+<h2>Search</h2>
+<form class="form">
+    {% block search_fields %}
+    {% endblock %}
+    <div class="form-actions" style="float: left; padding-top: 25px; padding-bottom: 25px">
         <button class="btn btn-default" type="submit"><span class="glyphicon glyphicon-search" aria-hidden="true"></span> Search</button>
-      </span>
     </div>
-  </div>
 </form>
 <br>
-<h2>{% trans "Ordering" %}</h2>
+<h2 style="clear: left">Ordering</h2>
 <div class="list-group">
     {% for key, val in order_by_options %}
         {% if order_by == key %}

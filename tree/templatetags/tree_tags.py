@@ -6,6 +6,7 @@ import itertools
 
 from django import template
 from django.template.loader import render_to_string
+from django.urls import reverse
 
 from tree import helpers
 
@@ -73,5 +74,13 @@ def render_bio(ancestor):
 
 
 @register.simple_tag()
-def ancestor_url(ancestor):
-    return helpers.ancestor_url(ancestor)
+def ancestor_url(ancestor, fallback_to_bio=True):
+    result = helpers.ancestor_url(ancestor)
+    if not result and fallback_to_bio:
+        result = reverse(
+            'ancestor_bio',
+            kwargs={
+                'ancestor': ancestor.slug
+            }
+        )
+    return result

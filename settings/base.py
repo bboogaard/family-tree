@@ -47,11 +47,15 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'nested_inline',
-    'rest_framework'
+    'rest_framework',
+    'rest_framework.authtoken',
+    'django_filters'
 ]
 
 PROJECT_APPS = [
-    'tree'
+    'api',
+    'tree',
+    'scraper'
 ]
 
 INSTALLED_APPS += PROJECT_APPS
@@ -146,6 +150,9 @@ PRODUCTION_ENV = False
 REST_FRAMEWORK = {
     # Use Django's standard `django.contrib.auth` permissions,
     # or allow read-only access for unauthenticated users.
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication'
+    ],
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
     ]
@@ -166,3 +173,12 @@ SEARCH_TEXT_ORDER_BY = (
     (SEARCH_ORDER_BY_AGE, 'Oldest'),
     (SEARCH_ORDER_BY_RANK, 'Most relevant'),
 )
+
+SEARCH_ANCESTOR_ORDER_BY = (
+    (SEARCH_ORDER_BY_AGE, 'Oldest'),
+)
+
+SCRAPE_DIRECTION_UP = 'up'
+SCRAPE_DIRECTION_DOWN = 'down'
+
+SCRAPE_DIRECTIONS = (SCRAPE_DIRECTION_UP, SCRAPE_DIRECTION_DOWN)

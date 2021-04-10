@@ -13,7 +13,7 @@
 
 </head>
 <body>
-    {% ancestor_url ancestor as anc_url %}
+    {% ancestor_url ancestor False as anc_url %}
     <h1>Persoonlijke gegevens van {% if anc_url %}<a href="{{ anc_url }}">{% endif %}{{ ancestor }}{% if anc_url %}</a>{% endif %}</h1>
     {% render_bio ancestor %}
 

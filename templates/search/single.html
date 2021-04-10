@@ -1,0 +1,8 @@
+{% extends 'search/base.html' %}
+
+{% block search_fields %}
+    <div class="form-group">
+        <label class="control-label">Search text:</label>
+        <input type="text" class="form-control" style="width: 350px" name="{{ search_param }}" value="{{ search_query }}">
+    </div>
+{% endblock %}
