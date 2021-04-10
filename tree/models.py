@@ -596,8 +596,22 @@ class LineageQuerySet(models.QuerySet):
                 'ancestor__father__children_of_father__marriages_of_wife',
             )
         )
+        descendants = [
+            generation.ancestor for generation in generations.all()
+        ]
+        candidates = self._get_candidates(ancestor, descendants)
 
+        return queryset.filter(ancestor__in=candidates)
+
+    def for_ancestor_and_descendants(self, ancestor, descendants):
+        queryset = self._clone()
+        candidates = self._get_candidates(ancestor, descendants)
+        return queryset.filter(ancestor__in=candidates)
+
+    @staticmethod
+    def _get_candidates(ancestor, descendants):
         candidates = [ancestor.pk]
+
         if ancestor.gender == 'm':
             for marriage in ancestor.marriages_of_husband.all():
                 candidates.append(marriage.wife_id)
@@ -605,8 +619,8 @@ class LineageQuerySet(models.QuerySet):
             for marriage in ancestor.marriages_of_wife.all():
                 candidates.append(marriage.husband_id)
 
-        for generation in generations:
-            siblings = generation.ancestor.father.children.all()
+        for descendant in descendants:
+            siblings = descendant.father.children.all()
             for child in siblings:
                 candidates.append(child.pk)
                 if child.gender == 'm':
@@ -616,7 +630,7 @@ class LineageQuerySet(models.QuerySet):
                     for marriage in child.marriages_of_wife.all():
                         candidates.append(marriage.husband_id)
 
-        return queryset.filter(ancestor__in=candidates)
+        return candidates
 
 
 class Lineage(models.Model):

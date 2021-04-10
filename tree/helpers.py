@@ -13,63 +13,19 @@ from django.utils.html import format_html
 from lib.cache.decorators import cache_result
 from services.lineage.service import LineageService
 from tree.models import Ancestor
-from tree.lineage import Lineages
+from tree.lineage import LineageBuilder, LineagesFactory
 
 
 re_bio_line = re.compile(r'^\*\s?([^:]+)\s?:\s(.*)$')
 
 
-class LineageBuilder(object):
-
-    def __init__(self):
-        self._descendant = None
-        self._generations = []
-
-    def build(self, lineage):
-        self._generations = []
-        self._get_generations(lineage.ancestor, lineage.descendant, 1)
-        return self._generations
-
-    def _get_generations(self, ancestor, descendant, generation):
-        children = self._get_children(ancestor)
-        if not children:
-            return
-
-        if descendant not in children:
-            for child in children:
-                if self._is_ancestor(child, descendant):
-                    self._generations.append((child, generation))
-                    self._get_generations(child, descendant, generation + 1)
-                    break
-
-    def _is_ancestor(self, candidate, descendant):
-        self._descendant = None
-        self._get_descendant(candidate, descendant)
-        return self._descendant is not None
-
-    def _get_descendant(self, candidate, descendant):
-        children = self._get_children(candidate)
-        if not children:
-            return
-
-        if descendant not in children:
-            for child in children:
-                self._get_descendant(child, descendant)
-        else:
-            self._descendant = descendant
-
-    @staticmethod
-    def _get_children(ancestor):
-        return list(ancestor.children.order_by_age())
-
-
 def build_lineage(lineage):
-    return LineageBuilder().build(lineage)
+    return LineageBuilder().build(lineage.ancestor, lineage.descendant)
 
 
 @cache_result('lineages', timeout=None)
-def get_lineages(ancestor):
-    return Lineages(ancestor)
+def get_lineages(ancestor, descendant=None):
+    return LineagesFactory.create(ancestor, descendant)
 
 
 def get_parents(descendant, visible_ancestors):

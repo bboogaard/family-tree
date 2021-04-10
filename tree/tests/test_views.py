@@ -55,6 +55,27 @@ class TestTreeView(TreeViewTest):
             '/stamboom/martin-glass-1836-1901/', expect_errors=True)
         self.assertEqual(response.status_code, 404)
 
+    def test_get_preview(self):
+        response = self.app.get(
+            '/stamboom/preview/john-glass-1812-1874/priscilla-glass-1840-1910',
+            user=self.test_user
+        )
+        self.assertEqual(response.status_code, 200)
+
+    def test_get_preview_not_logged_in(self):
+        response = self.app.get(
+            '/stamboom/preview/john-glass-1812-1874/priscilla-glass-1840-1910'
+        )
+        self.assertEqual(response.status_code, 302)
+
+    def test_get_preview_descendant_not_found(self):
+        response = self.app.get(
+            '/stamboom/preview/john-glass-1812-1874/priscilla-glass-1839-1910',
+            user=self.test_user,
+            expect_errors=True
+        )
+        self.assertEqual(response.status_code, 404)
+
     def test_get_bio(self):
         response = self.app.get(
             '/stamboom/john-glass-1812-1874/persoonlijke-gegevens',

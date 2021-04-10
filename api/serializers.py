@@ -78,7 +78,7 @@ class ListTreeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Ancestor
-        fields = ['id', 'ancestor', 'url', 'has_lineage']
+        fields = ['id', 'slug', 'ancestor', 'url', 'has_lineage']
 
     @property
     def request(self):
