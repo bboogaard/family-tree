@@ -64,7 +64,7 @@ class AncestorSearchAncestorSerializer(AncestorSerializer):
     def get_create_tree_url(self, obj):
         scheme = 'https' if self.request.is_secure() else 'http'
         return scheme + '://' + self.request.get_host() + reverse(
-            'api:trees-create-tree', args=[obj.pk]
+            'api:trees-list'
         )
 
 
@@ -104,9 +104,9 @@ class ListTreeSerializer(serializers.ModelSerializer):
 
 class CreateTreeSerializer(serializers.Serializer):
 
-    ancestor_id = serializers.IntegerField()
+    ancestor_id = serializers.IntegerField(write_only=True)
 
-    descendant_id = serializers.IntegerField()
+    descendant_id = serializers.IntegerField(write_only=True)
 
     @property
     def request(self):
