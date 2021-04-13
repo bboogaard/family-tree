@@ -2,6 +2,7 @@ from django_webtest import WebTest
 from django.contrib.auth.models import User
 from django.core.cache import cache
 from django.test import TestCase
+from rest_framework.authtoken.models import Token
 
 from lib.testing.mixins import AssertsMixin
 from tree.tests import factories
@@ -190,3 +191,9 @@ class TreeViewTest(WebTest, TreeTestCase):
             'test_user', 'test@localhost.tld', '123456',
             is_staff=True
         )
+        self.token = Token.objects.create(user=self.test_user, key='asdf')
+
+    def post_secure(self, url, data, *args, **kwargs):
+        return self.app.post(url, data, headers={
+            'Authorization': 'Token {}'.format(self.token.key)
+        }, *args, **kwargs)

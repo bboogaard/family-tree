@@ -49,7 +49,8 @@ INSTALLED_APPS = [
     'nested_inline',
     'rest_framework',
     'rest_framework.authtoken',
-    'django_filters'
+    'django_filters',
+    'crispy_forms',
 ]
 
 PROJECT_APPS = [
@@ -182,3 +183,7 @@ SCRAPE_DIRECTION_UP = 'up'
 SCRAPE_DIRECTION_DOWN = 'down'
 
 SCRAPE_DIRECTIONS = (SCRAPE_DIRECTION_UP, SCRAPE_DIRECTION_DOWN)
+
+CRISPY_TEMPLATE_PACK = 'bootstrap3'
+
+API_URL = None

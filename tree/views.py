@@ -6,9 +6,12 @@ from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.views.generic import TemplateView
+from django.views.generic.base import ContextMixin, TemplateResponseMixin, View
 
+from lib.api import call_api
 from lib.auth import login_protected
-from tree import models
+from services.tree.service import TreeService
+from tree import forms, models
 from tree.helpers import get_lineages, get_marriages
 from version import VERSION
 
@@ -78,6 +81,62 @@ class PreviewTreeView(BaseTreeView):
 
     def _get_lineages(self):
         return get_lineages(self.ancestor, self.descendant)
+
+
+@login_protected()
+class CreateTreeView(ContextMixin, TemplateResponseMixin, View):
+
+    template_name = 'create_tree.html'
+
+    def dispatch(self, request, *args, **kwargs):
+        self.descendant = get_object_or_404(models.Ancestor, pk=self.kwargs['pk'])
+        self.ancestors = TreeService().find(self.descendant)
+        return super().dispatch(request, *args, **kwargs)
+
+    def get(self, request, *args, **kwargs):
+        form = self.get_form(descendant=self.descendant, ancestors=self.ancestors)
+        context = self.get_context_data(descendant=self.descendant, form=form)
+        return self.render_to_response(context)
+
+    def post(self, request, *args, **kwargs):
+        form = self.get_form(request.POST, descendant=self.descendant, ancestors=self.ancestors)
+        if form.is_valid():
+            response_status, response_data = call_api('trees', form.cleaned_data, self.request.user)
+            if response_status == 201:
+                return redirect(request.path)
+
+            context = self.get_context_data(
+                descendant=self.descendant,
+                form=form,
+                response_status=response_status,
+                response_data=response_data
+            )
+        else:
+            context = self.get_context_data(descendant=self.descendant, form=form)
+
+        return self.render_to_response(context)
+
+    def get_form(self, data=None, **kwargs):
+        return forms.CreateTreeForm(data, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({
+            'name': 'Ancestors of {}'.format(self.descendant),
+            'breadcrumblist': [
+                ('Ancestors of {}'.format(self.descendant), self.request.path)
+            ],
+            'preview_urls': {
+                ancestor.pk: reverse(
+                    'preview_tree', kwargs={
+                        'ancestor': ancestor.slug,
+                        'descendant': self.descendant.slug
+                    }
+                )
+                for ancestor in self.ancestors
+            }
+        })
+        return context
 
 
 def bio(request, ancestor):
