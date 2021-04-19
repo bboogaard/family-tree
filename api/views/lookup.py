@@ -14,7 +14,7 @@ class LookupViewSet(ListModelMixin, GenericViewSet):
     filter_backends = [DjangoFilterBackend]
 
     @action(methods=['get'], detail=False, url_path='page')
-    def page(self,request, *args, **kwargs):
+    def page(self, request, *args, **kwargs):
         self.filterset_class = search_filterset_factory(Page, ['name'], max_results=10)
         self.serializer_class = PageSerializer
         return super().list(request, *args, **kwargs)

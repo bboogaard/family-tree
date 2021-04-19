@@ -23,5 +23,5 @@ class TestTreeService(TreeTestCase):
 
     def test_find(self):
         result = TreeService().find(self.generation_2[0])
-        expected = [self.top_male, self.top_female, self.spouse_1]
+        expected = [self.top_female, self.spouse_1]
         self.assertEqual(result, expected)

@@ -179,7 +179,7 @@ class SearchTermFilter(filters.CharFilter):
         return qs[:self._max_results] if self._max_results else qs
 
 
-def search_term_filter_factory(search_fields, max_results = None):
+def search_term_filter_factory(search_fields, max_results=None):
     return type(
         'SearchTermFilter',
         (SearchTermFilter, ),
@@ -187,14 +187,14 @@ def search_term_filter_factory(search_fields, max_results = None):
     )
 
 
-def filterset_factory(model, fields = ALL_FIELDS, attrs = None):
+def filterset_factory(model, fields=ALL_FIELDS, attrs=None):
     filterset_class = base_filterset_factory(model, fields)
     attrs = attrs if attrs is not None else {}
     return type(filterset_class.__name__, (filterset_class, ), attrs)
 
 
-def search_filterset_factory(model, search_fields, search_param = 'q',
-                             max_results = None, attrs = None):
+def search_filterset_factory(model, search_fields, search_param='q',
+                             max_results=None, attrs=None):
     attrs = attrs if attrs is not None else {}
     attrs.update({
         search_param: search_term_filter_factory(search_fields, max_results)()
