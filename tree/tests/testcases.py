@@ -193,6 +193,11 @@ class TreeViewTest(WebTest, TreeTestCase):
         )
         self.token = Token.objects.create(user=self.test_user, key='asdf')
 
+    def get_secure(self, url, data, *args, **kwargs):
+        return self.app.get(url, data, headers={
+            'Authorization': 'Token {}'.format(self.token.key)
+        }, *args, **kwargs)
+
     def post_secure(self, url, data, *args, **kwargs):
         return self.app.post(url, data, headers={
             'Authorization': 'Token {}'.format(self.token.key)

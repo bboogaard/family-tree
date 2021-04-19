@@ -1,0 +1,12 @@
+{% extends 'rest_framework/api.html' %}
+
+{% load crispy_forms_tags %}
+
+
+{% block content %}
+
+    <h1>Task helper</h1>
+
+    {% crispy form %}
+
+{% endblock %}

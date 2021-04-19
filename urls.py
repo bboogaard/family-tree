@@ -18,7 +18,7 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path, re_path
 
-from tree.views import bio, CreateTreeView, TreeView, PreviewTreeView, version
+from tree.views import bio, CreateTreeView, PreviewTreeView, RunTaskView, TaskHelper, TreeView, version
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -29,6 +29,8 @@ urlpatterns = [
             name='ancestor_bio'),
     re_path(r'^tree/preview/(?P<ancestor>[^/]+)/(?P<descendant>[^/]+)$', PreviewTreeView.as_view(), name='preview_tree'),
     re_path(r'^tree/create/(?P<pk>[^/]+)$', CreateTreeView.as_view(), name='create_tree'),
+    re_path(r'^task/run$', RunTaskView.as_view(), name='run_task'),
+    re_path(r'^task/helper/(?P<command>scrape_page)$', TaskHelper.as_view(), name='task_helper'),
     re_path(r'^api/v1/', include('api.urls', namespace='api')),
 ]
 
