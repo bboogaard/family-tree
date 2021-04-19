@@ -6,6 +6,7 @@ from rest_framework.exceptions import NotFound
 
 from lib.search.search_vectors import get_search_vector_search_fields
 from lib.search.serializers import search_vector_model_serializer_factory
+from scraper.models import Page
 from services.tree.service import TreeService
 from tree.models import Ancestor, Bio, BioLink, ChristianName, Marriage
 
@@ -131,3 +132,18 @@ class CreateTreeSerializer(serializers.Serializer):
         ancestor = validated_data['ancestor']
         descendant = validated_data['descendant']
         return TreeService().create(ancestor, descendant)
+
+
+class PageSerializer(serializers.ModelSerializer):
+
+    name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Page
+        fields = ['id', 'name']
+
+    def get_name(self, obj):
+        if ancestor := obj.ancestor:
+            return str(ancestor)
+
+        return obj.name
