@@ -46,10 +46,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.forms',
     'nested_inline',
     'rest_framework',
     'rest_framework.authtoken',
-    'django_filters'
+    'django_filters',
+    'crispy_forms',
 ]
 
 PROJECT_APPS = [
@@ -87,6 +89,8 @@ TEMPLATES = [
         },
     },
 ]
+
+FORM_RENDERER = 'django.forms.renderers.TemplatesSetting'
 
 WSGI_APPLICATION = 'wsgi.application'
 
@@ -151,7 +155,7 @@ REST_FRAMEWORK = {
     # Use Django's standard `django.contrib.auth` permissions,
     # or allow read-only access for unauthenticated users.
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.SessionAuthentication'
+        'rest_framework.authentication.TokenAuthentication'
     ],
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
@@ -181,4 +185,17 @@ SEARCH_ANCESTOR_ORDER_BY = (
 SCRAPE_DIRECTION_UP = 'up'
 SCRAPE_DIRECTION_DOWN = 'down'
 
-SCRAPE_DIRECTIONS = (SCRAPE_DIRECTION_UP, SCRAPE_DIRECTION_DOWN)
+SCRAPE_DIRECTIONS = (
+    (SCRAPE_DIRECTION_UP, 'Up'),
+    (SCRAPE_DIRECTION_DOWN, 'Down')
+)
+
+CRISPY_TEMPLATE_PACK = 'bootstrap3'
+
+ASYNC_TASKS = True
+
+COMMAND_SCRAPE_PAGE = 'scrape_page'
+
+AVAILABLE_COMMANDS = (
+    (COMMAND_SCRAPE_PAGE, 'Scrape page'),
+)

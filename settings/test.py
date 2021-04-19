@@ -6,3 +6,5 @@ CACHES = {
         'BACKEND': 'tree.tests.cache.TestCache'
     }
 }
+
+ASYNC_TASKS = False

@@ -1,0 +1,50 @@
+{% extends 'rest_framework/api.html' %}
+
+{% load crispy_forms_tags %}
+{% load static %}
+
+
+{% block content %}
+
+    <h1>Run task</h1>
+
+    {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-info fade in alert-dismissible" style="margin-top:18px;">
+            <a href="#" class="close" data-dismiss="alert" aria-label="close" title="close">×</a>
+            {{ message }}
+        </div>
+        {% endfor %}
+    {% endif %}
+
+    {% if response_status and response_data %}
+    <div class="row">
+        <div class="col-md-offset-2 col-md-8">
+            <b>HTTP {{ response_status }}</b>
+            <pre class="prettyprint">{{ response_data }}</pre>
+        </div>
+    </div>
+    {% endif %}
+
+    {% crispy form %}
+
+{% endblock %}
+
+{% block script %}
+    {{ block.super }}
+
+    {{ form.task_helpers|json_script:'task-helpers' }}
+    <script type="text/javascript">
+        var helper_btn = $('#helper-btn');
+        var task_helpers = JSON.parse(document.getElementById('task-helpers').textContent);
+        $(function() {
+            helper_btn.click(function() {
+               window.location.href = task_helpers[$('#id_command').val()] +
+               ($('#id_query_string').val() ? "?" + $('#id_query_string').val() : "");
+            });
+            $('#id_command').change(function() {
+                helper_btn.prop('disabled', !$(this).val());
+            }).trigger('change');
+        });
+    </script>
+{% endblock %}

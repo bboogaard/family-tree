@@ -1,0 +1,23 @@
+{% include "django/forms/widgets/input.html" %}
+<input type="hidden" name="{{ widget.name }}-hidden" value="{{ hidden_value|default_if_none:'' }}">
+<script type="text/javascript">
+    $(function () {
+        var $input = $('input[name="{{ widget.name }}"]');
+        var $hidden = $('input[name="{{ widget.name }}-hidden"]');
+        $input.typeahead({
+            source: function (query, process) {
+                return $.get('{{ lookup_url }}', { q: query }, function (data) {
+                    console.log(data);
+                    return process(data);
+                });
+            },
+            autoSelect: true
+        });
+        $input.change(function() {
+            var current = $input.typeahead("getActive");
+            if (current !== undefined && current) {
+                $hidden.val(current.id);
+            }
+        });
+    });
+</script>

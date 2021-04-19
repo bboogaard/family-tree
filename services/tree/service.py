@@ -33,7 +33,8 @@ class TreeService(ABC):
 
     def _find_ancestors(self, descendant: Ancestor, generation: int = 0):
         candidates = list(filter(
-            lambda a: a and a.was_married, [descendant.father, descendant.mother]
+            lambda a: a and a.was_married and not a.get_lineage(),
+            [descendant.father, descendant.mother]
         ))
         if not candidates and generation:
             self._ancestors.append((descendant, generation))

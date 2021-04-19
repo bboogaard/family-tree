@@ -19,7 +19,9 @@ class Command(BaseCommand):
         except Page.DoesNotExist:
             raise CommandError("Page not found")
 
-        if options['direction'] not in settings.SCRAPE_DIRECTIONS:
+        scrape_directions = [key for key, val in settings.SCRAPE_DIRECTIONS]
+
+        if options['direction'] not in scrape_directions:
             raise CommandError("Not a valid search direction")
 
         ScraperService().find(page, depth=options['depth'], direction=options['direction'])

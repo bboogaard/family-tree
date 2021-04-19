@@ -1,0 +1,38 @@
+{% extends 'rest_framework/base.html' %}
+
+{% load crispy_forms_tags %}
+
+
+{% block content %}
+
+    <h1>Ancestors of {{ descendant }}</h1>
+
+    {% if response_status and response_data %}
+    <div class="row">
+        <div class="col-md-offset-2 col-md-8">
+            <b>HTTP {{ response_status }}</b>
+            <pre class="prettyprint">{{ response_data }}</pre>
+        </div>
+    </div>
+    {% endif %}
+
+    {% crispy form %}
+
+{% endblock %}
+
+{% block script %}
+    {{ block.super }}
+    {{ preview_urls|json_script:'preview-urls' }}
+    <script type="text/javascript">
+        var preview_btn = $('input[name="preview-btn"]');
+        var preview_urls = JSON.parse(document.getElementById('preview-urls').textContent);
+        $(function() {
+            $('select').change(function() {
+                preview_btn.prop('disabled', $(this).val() === '');
+            });
+            preview_btn.click(function() {
+               window.open(preview_urls[$('select').val()], "_blank");
+            });
+        });
+    </script>
+{% endblock %}

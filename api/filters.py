@@ -1,7 +1,11 @@
 from dacite import from_dict
 from dataclasses import asdict
 
+from django_filters import filters
+from django_filters.constants import ALL_FIELDS
+from django_filters.filterset import filterset_factory as base_filterset_factory
 from django.core.exceptions import ImproperlyConfigured
+from django.db.models import Q
 from django.template import loader
 from django.utils.functional import cached_property
 from rest_framework.filters import BaseFilterBackend
@@ -155,3 +159,44 @@ class SearchAncestorFilter(MultiSearchFilter):
     search_service_class = SearchAncestorService
 
     template = 'search/ancestor.html'
+
+
+class SearchTermFilter(filters.CharFilter):
+
+    _search_fields = None
+
+    _max_results = None
+
+    def filter(self, qs, value):
+        if value:
+            search_clause = Q()
+            for search_field in self._search_fields:
+                search_clause |= Q(**{
+                    '{}__icontains'.format(search_field): value
+                })
+            qs = qs.filter(search_clause)
+
+        return qs[:self._max_results] if self._max_results else qs
+
+
+def search_term_filter_factory(search_fields, max_results=None):
+    return type(
+        'SearchTermFilter',
+        (SearchTermFilter, ),
+        {'_search_fields': search_fields, '_max_results': max_results}
+    )
+
+
+def filterset_factory(model, fields=ALL_FIELDS, attrs=None):
+    filterset_class = base_filterset_factory(model, fields)
+    attrs = attrs if attrs is not None else {}
+    return type(filterset_class.__name__, (filterset_class, ), attrs)
+
+
+def search_filterset_factory(model, search_fields, search_param='q',
+                             max_results=None, attrs=None):
+    attrs = attrs if attrs is not None else {}
+    attrs.update({
+        search_param: search_term_filter_factory(search_fields, max_results)()
+    })
+    return filterset_factory(model, [], attrs)

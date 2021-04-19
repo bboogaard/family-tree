@@ -2,13 +2,17 @@
 Views for the tree app.
 
 """
+from django.contrib import messages
 from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
+from django.utils.http import urlencode
 from django.views.generic import TemplateView
 
 from lib.auth import login_protected
-from tree import models
+from lib.views import CallApiView, FormView
+from services.tree.service import TreeService
+from tree import forms, models
 from tree.helpers import get_lineages, get_marriages
 from version import VERSION
 
@@ -78,6 +82,102 @@ class PreviewTreeView(BaseTreeView):
 
     def _get_lineages(self):
         return get_lineages(self.ancestor, self.descendant)
+
+
+class CreateTreeView(CallApiView):
+
+    endpoint = reverse_lazy('api:trees-list')
+
+    expected_status = 201
+
+    form_class = forms.CreateTreeForm
+
+    template_name = 'create_tree.html'
+
+    def dispatch(self, request, *args, **kwargs):
+        self.descendant = get_object_or_404(models.Ancestor, pk=self.kwargs['pk'])
+        self.ancestors = TreeService().find(self.descendant)
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_form(self, data=None, **kwargs):
+        return forms.CreateTreeForm(
+            data, descendant=self.descendant, ancestors=self.ancestors, **kwargs
+        )
+
+    def get_title(self):
+        return 'Ancestors of {}'.format(self.descendant)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({
+            'descendant': self.descendant,
+            'ancestors': self.ancestors,
+            'preview_urls': {
+                ancestor.pk: reverse(
+                    'preview_tree', kwargs={
+                        'ancestor': ancestor.slug,
+                        'descendant': self.descendant.slug
+                    }
+                )
+                for ancestor in self.ancestors
+            }
+        })
+        return context
+
+
+class RunTaskView(CallApiView):
+
+    form_class = forms.TaskForm
+
+    endpoint_method = 'get'
+
+    template_name = 'run_task.html'
+
+    title = 'Run task'
+
+    def get_endpoint(self, data):
+        command = data.pop('command')
+        return reverse('api:tasks-run-command', kwargs={
+            'command': command
+        })
+
+    def send_messages(self):
+        messages.add_message(self.request, messages.INFO, 'Task started')
+
+
+@login_protected()
+class TaskHelper(FormView):
+
+    redirect_url = reverse_lazy('run_task')
+
+    template_name = 'task_helper.html'
+
+    title = 'Task helper'
+
+    def dispatch(self, request, command, *args, **kwargs):
+        self.command = command
+        return super().dispatch(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        data = {
+            key: val for key, val in form.cleaned_data.items() if val is not None
+        }
+        params = {
+            'command': self.command,
+            'query_string': urlencode(data)
+        }
+        return redirect(
+            self.get_redirect_url() + '?' + urlencode(params)
+        )
+
+    def get_form_class(self):
+        if self.command == 'scrape_page':
+            return forms.ScrapePageForm
+
+        raise NotImplementedError()
+
+    def get_redirect_url(self):
+        return self.redirect_url
 
 
 def bio(request, ancestor):
