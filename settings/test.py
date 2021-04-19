@@ -7,4 +7,4 @@ CACHES = {
     }
 }
 
-API_URL = 'http://testserver/api/v1/'
+ASYNC_TASKS = False
